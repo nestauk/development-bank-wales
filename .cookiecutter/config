@@ -1,0 +1,5 @@
+# Change these at your peril:
+export PROJECT_NAME=development-bank-wales
+export REPO_NAME=development_bank_wales
+export DESCRIPTION=A short description of the project.
+export PROJECT_OPENNESS=public
