@@ -172,10 +172,6 @@ for rec in list(certificates_df["IMPROVEMENT_ID_TEXT"].unique()):
 first_wales = upgrades.get_upgrades(first_wales, latest_wales, keep="first")
 
 # %%
-from heat_pump_adoption_modelling.pipeline.supervised_model.utils import (
-    data_agglomeration,
-)
-
 if "LATITUDE" in first_wales.columns:
     first_wales.drop(columns=["LATITUDE", "LONGITUDE"], inplace=True)
 
@@ -725,3 +721,6 @@ latest_wales = data_agglomeration.add_hex_id(latest_wales, resolution=7.5)
 hex_to_LA = data_agglomeration.map_hex_to_feature(latest_wales, "LOCAL_AUTHORITY_LABEL")
 
 # %%
+from asf_core_data.getters.epc import epc_data
+
+epc_df = epc_data.load_and_preprocess(version="newest")

@@ -1,6 +1,17 @@
 import pandas as pd
 import numpy as np
 
+import networkx as nx
+import matplotlib.pyplot as plt
+
+from development_bank_wales import PROJECT_DIR, get_yaml_config, Path
+
+# Load config file
+config = get_yaml_config(
+    Path(str(PROJECT_DIR) + "/development_bank_wales/config/base.yaml")
+)
+
+
 quality_dict = {"Very Good": 5, "Good": 4, "Average": 3, "Poor": 2, "Very Poor": 1}
 
 
@@ -18,12 +29,15 @@ eff_dict = {
 
 sectors = ["WALLS", "ROOF", "MAINHEAT", "HOT_WATER", "LIGHTING", "FLOOR", "WINDOWS"]
 
+quality_dict = {"Very Good": 5, "Good": 4, "Average": 3, "Poor": 2, "Very Poor": 1}
 
-def get_upgrades(df1, df2, keep="first"):
+
+def get_upgrades(df1, df2, keep="first", verbose=True):
 
     for sector in sectors:
 
-        print(sector)
+        if verbose:
+            print(sector)
 
         eff, desc = eff_dict[sector]
         df1[eff + "_NUM"] = df1[eff].map(quality_dict)
@@ -34,13 +48,13 @@ def get_upgrades(df1, df2, keep="first"):
             df2[[desc, eff + "_NUM", "UPRN"]],
             on="UPRN",
         )
-        combo[desc + "_DIFF"] = combo[eff + "_NUM_y"] - combo[eff + "_NUM_x"]
-        combo[desc + "_DIFF"].fillna(0.0, inplace=True)
+        combo[sector + "_EFF_DIFF"] = combo[eff + "_NUM_y"] - combo[eff + "_NUM_x"]
+        combo[sector + "_EFF_DIFF"].fillna(0.0, inplace=True)
 
         combo["CHANGE_" + desc] = np.where(
             (
                 (combo[desc + "_x"] != combo[desc + "_y"])
-                & (combo[desc + "_DIFF"] > 0.0)
+                & (combo[sector + "_EFF_DIFF"] > 0.0)
             ),
             combo[desc + "_x"] + " --> " + combo[desc + "_y"],
             "no upgrade",
@@ -48,41 +62,45 @@ def get_upgrades(df1, df2, keep="first"):
 
         if keep == "first":
             df = pd.merge(
-                df1, combo[[desc + "_DIFF", "CHANGE_" + desc, "UPRN"]], on="UPRN"
+                df1, combo[[sector + "_EFF_DIFF", "CHANGE_" + desc, "UPRN"]], on="UPRN"
             )
         else:
             df = pd.merge(
-                df2, combo[[desc + "_DIFF", "CHANGE_" + desc, "UPRN"]], on="UPRN"
+                df2, combo[[sector + "_EFF_DIFF", "CHANGE_" + desc, "UPRN"]], on="UPRN"
             )
 
         df["UPGRADED_" + desc] = np.where(
             df["CHANGE_" + desc] != "no upgrade", True, False
         )
 
-        print(
-            "Upgraded: {}%".format(
-                round(df.loc[df["UPGRADED_" + desc]].shape[0] / df.shape[0] * 100, 2)
+        if verbose:
+            print(
+                "Upgraded: {}%".format(
+                    round(
+                        df.loc[df["UPGRADED_" + desc]].shape[0] / df.shape[0] * 100, 2
+                    )
+                )
             )
-        )
 
         upgradables = df.loc[df["UPGRADED_" + desc]][desc].unique()
 
-        print(
-            "Upgradable: {}%".format(
-                round(
-                    df.loc[df[sector + "_DESCRIPTION"].isin(upgradables)].shape[0]
-                    / df.shape[0]
-                    * 100,
-                    2,
+        if verbose:
+            print(
+                "Upgradable: {}%".format(
+                    round(
+                        df.loc[df[sector + "_DESCRIPTION"].isin(upgradables)].shape[0]
+                        / df.shape[0]
+                        * 100,
+                        2,
+                    )
                 )
             )
-        )
-        print()
+            print()
 
         df["UPGRADABLE_" + sector] = np.where(df[desc].isin(upgradables), True, False)
 
         mapping = dict(
-            df.loc[df["UPGRADED_" + desc]].groupby(desc)[desc + "_DIFF"].mean()
+            df.loc[df["UPGRADED_" + desc]].groupby(desc)[sector + "_EFF_DIFF"].mean()
         )
 
         df["UPGRADABILITY_" + sector] = df[desc].map(mapping)
@@ -110,15 +128,15 @@ def get_upgrades(df1, df2, keep="first"):
         ]
     ].mean(axis=1)
 
-    df["TOTAL_DESCRIPTION_DIFF"] = df[
+    df["TOTAL_EFF_DIFF"] = df[
         [
-            "ROOF_DESCRIPTION_DIFF",
-            "WALLS_DESCRIPTION_DIFF",
-            "HOT_WATER_DESCRIPTION_DIFF",
-            "MAINHEAT_DESCRIPTION_DIFF",
-            "LIGHTING_DESCRIPTION_DIFF",
-            "FLOOR_DESCRIPTION_DIFF",
-            "WINDOWS_DESCRIPTION_DIFF",
+            "ROOF_EFF_DIFF",
+            "WALLS_EFF_DIFF",
+            "HOT_WATER_EFF_DIFF",
+            "MAINHEAT_EFF_DIFF",
+            "LIGHTING_EFF_DIFF",
+            "FLOOR_EFF_DIFF",
+            "WINDOWS_EFF_DIFF",
         ]
     ].mean(axis=1)
 
@@ -144,6 +162,87 @@ def get_upgrades(df1, df2, keep="first"):
             "UPGRADED_FLOOR_DESCRIPTION",
             "UPGRADED_WINDOWS_DESCRIPTION",
         ]
-    ].min(axis=1)
+    ].max(axis=1)
+
+    return df
+
+
+def uprade_connections(df):
+
+    G = nx.Graph()
+
+    for sector_1 in sectors:
+        for sector_2 in sectors:
+
+            if sector_1 == sector_2:
+                continue
+
+            upgraded_properties = df.loc[df["ANY_UPGRADES"]]
+            n_any_upgrades = upgraded_properties.shape[0]
+            n_combo = (
+                upgraded_properties.loc[
+                    upgraded_properties["UPGRADED_{}_DESCRIPTION".format(sector_1)]
+                    & upgraded_properties["UPGRADED_{}_DESCRIPTION".format(sector_2)]
+                ].shape[0]
+                / n_any_upgrades
+                * 100
+            )
+
+            G.add_edge(sector_1, sector_2, weight=n_combo)
+
+    edge_weights = [G[u][v]["weight"] / 5 for u, v in G.edges()]
+    nx.draw(
+        G,
+        pos=nx.circular_layout(G),
+        node_size=5000,
+        node_color="orange",
+        width=edge_weights,
+        with_labels=True,
+    )
+
+    edge_labels = dict(
+        [((n1, n2), str(round(d["weight"])) + "%") for n1, n2, d in G.edges(data=True)]
+    )
+
+    nx.draw_networkx_edge_labels(
+        G, pos=nx.circular_layout(G), edge_labels=edge_labels, font_color="red"
+    )
+
+    plt.tight_layout()
+    plt.show()
+    file_path = PROJECT_DIR / config["FIGURE_OUT"] / "Upgrade_connections.png"
+
+    plt.savefig(file_path, format="PNG")
+
+
+def get_sector_info_by_area(df, agglo_f, include_imd=True):
+
+    sectors = [
+        "ROOF",
+        "WALLS",
+        "MAINHEAT",
+        "HOT_WATER",
+        "LIGHTING",
+        "FLOOR",
+        "WINDOWS",
+        "TOTAL",
+    ]
+    features = ["UPGRADABILITY_{}", "{}_EFF_DIFF", "{}_ENERGY_EFF_NUM"]
+
+    for sector in sectors:
+
+        for feature in features:
+
+            feature_name = feature.format(sector)
+            mapping = dict(df.groupby(agglo_f)[feature_name].mean())
+            df[feature_name + "_MEAN"] = (
+                round(df[agglo_f].map(mapping), 2)
+                .fillna(0.0)
+                .apply(lambda x: x if x > 0 else 0)
+            )
+
+    if include_imd:
+        mapping = dict(df.groupby(agglo_f)["IMD Decile"].mean())
+        df["IMD Decile Hex"] = round(df[agglo_f].map(mapping), 2).fillna(0.0)
 
     return df

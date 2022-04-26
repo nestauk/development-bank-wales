@@ -10,3 +10,5 @@ sh
 asf_core_data@ git+ssh://git@github.com/nestauk/asf_core_data.git@2_epc_processing
 boto3
 ipywidgets
+keplergl
+networkx

@@ -38,7 +38,7 @@ def load_epc_certs_and_recs(
         df, recommendations.drop(columns=["COUNTRY"]), on=["LMK_KEY"], how="inner"
     )
 
-    # merged = merged.rename(columns={"HOT_WATER_ENERGY_EFF": "HOTWATER_ENERGY_EFF"})
+    merged = merged.rename(columns={"HOTWATER_DESCRIPTION": "HOT_WATER_DESCRIPTION"})
 
     return merged
 
