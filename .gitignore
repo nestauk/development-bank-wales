@@ -112,6 +112,9 @@ target/
 !/outputs/models/*.md
 /outputs/figures*
 
+/development_bank_wales/analysis/Recycling/*
+
+
 # Mac OS-specific storage files
 .DS_Store
 
