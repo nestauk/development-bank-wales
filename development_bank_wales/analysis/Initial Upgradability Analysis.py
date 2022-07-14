@@ -30,7 +30,7 @@ from asf_core_data.utils.visualisation import easy_plotting, kepler
 from asf_core_data.utils.geospatial import data_agglomeration
 
 from development_bank_wales import PROJECT_DIR, Path
-from development_bank_wales.pipeline import recommendations, upgrades, settings
+from development_bank_wales.pipeline import recommendations, upgrades
 
 import re
 import numpy as np
@@ -134,18 +134,20 @@ def plot_recommendations(rec):
 # ## Recommendations over Time
 
 # %%
-latest_wales = feature_engineering.filter_by_year(
+latest_wales = epc_data.filter_by_year(
     wales_df.loc[wales_df["N_ENTRIES"].isin(["2", "3", "4", "5.0+"])],
-    "UPRN",
     None,
     selection="latest entry",
 )
-first_wales = feature_engineering.filter_by_year(
+first_wales = epc_data.filter_by_year(
     wales_df.loc[wales_df["N_ENTRIES"].isin(["2", "3", "4", "5.0+"])],
-    "UPRN",
     None,
     selection="first entry",
 )
+
+# %%
+latest_wales = epc_data.filter_by_year(wales_df, None, selection="latest entry")
+first_wales = epc_data.filter_by_year(wales_df, None, selection="first entry")
 
 # %%
 rec = "Increase loft insulation to 270 mm"
@@ -157,12 +159,8 @@ latest_wales[rec].value_counts(normalize=True)
 # %%
 wales_df = wales_df.loc[wales_df["TENURE"] == "owner-occupied"]
 
-latest_wales = feature_engineering.filter_by_year(
-    wales_df, "UPRN", None, selection="latest entry"
-)
-first_wales = feature_engineering.filter_by_year(
-    wales_df, "UPRN", None, selection="first entry"
-)
+latest_wales = epc_data.filter_by_year(wales_df, None, selection="latest entry")
+first_wales = epc_data.filter_by_year(wales_df, None, selection="first entry")
 
 for rec in list(wales_df["IMPROVEMENT_ID_TEXT"].unique()):
 
@@ -187,12 +185,8 @@ def plot_recommendations(rec, wales_df):
 
     # Get first and last wales info
     wales_df = wales_df.loc[wales_df["TENURE"] == "owner-occupied"]
-    latest_wales = feature_engineering.filter_by_year(
-        wales_df, "UPRN", None, selection="latest entry"
-    )
-    first_wales = feature_engineering.filter_by_year(
-        wales_df, "UPRN", None, selection="first entry"
-    )
+    latest_wales = epc_data.filter_by_year(wales_df, None, selection="latest entry")
+    first_wales = epc_data.filter_by_year(wales_df, None, selection="first entry")
 
     first_wales = recommendations.check_for_implemented_rec(
         rec, first_wales, latest_wales, keep="first", identifier="UPRN"
@@ -587,3 +581,23 @@ def plotting(sector, feature):
 upgrades.uprade_connections(latest_wales)
 
 # %%
+from asf_core_data.utils.geospatial import data_agglomeration
+from asf_core_data.utils.visualisation import kepler
+
+# Add coordinates and hex ID
+wales_df = data_agglomeration.get_postcode_coordinates(
+    wales_df, data_path=LOCAL_DATA_DIR
+)
+wales_df = data_agglomeration.add_hex_id(wales_df, resolution=7.5)
+
+# Hex ID and Local most frequent local authority label
+hex_to_LA = data_agglomeration.map_hex_to_feature(wales_df, "LOCAL_AUTHORITY_LABEL")
+
+# Get agglomerated data for kepler map (for each Local Authority)
+kepler_df = get_agglomerated_kepler_data(wales_df, "LOCAL_AUTHORITY_LABEL")
+
+# <create kepler map>
+
+# Save configs and map
+kepler.save_config(upgrade_map, "upgradability.txt", data_path=PROJECT_DIR)
+kepler.save_map(upgrade_map, "Upgradability.html", data_path=PROJECT_DIR)
