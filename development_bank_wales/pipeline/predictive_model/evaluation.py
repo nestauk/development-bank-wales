@@ -2,9 +2,7 @@
 """
 Evaluation of predictive model.
 """
-
 # ----------------------------------------------------------------------------------
-
 
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, recall_score, precision_score
