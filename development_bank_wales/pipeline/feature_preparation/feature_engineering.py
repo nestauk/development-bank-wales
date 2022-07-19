@@ -1,8 +1,35 @@
-from development_bank_wales.pipeline.feature_preparation import upgrades
+# File: development_bank_wales/pipeline/feature_preparation/feature_enginnering.py
+"""Extract new features from original features."""
+
+# ---------------------------------------------------------------------------------
+
+import pandas as pd
 from asf_core_data.getters.epc import epc_data
+
+# ---------------------------------------------------------------------------------
+
+
+cats = [
+    "ROOF",
+    "WINDOWS",
+    "WALLS",
+    "FLOOR",
+    "LIGHTING",
+    "HOT_WATER",
+    "MAINHEAT",
+]
 
 
 def roof_description_features(df):
+    """Extract roof features from ROOF_DESCRIPTION.
+    Note: This function will be added to the asf-core-data package as part of the processing pipeline.
+
+    Args:
+        df (pd.DataFrame): Dataframe including column ROOF_DESCRIPTION
+
+    Returns:
+        df (pd.DataFrame): Dataframe with additional roof features.
+    """
 
     df["ROOF TYPE"] = df["ROOF_DESCRIPTION"].str.extract(
         r"(Pitched|Flat|Roof room\(s\)|Flat|Ar oleddf|\(other premises above\)|Other premises above|\(another dwelling above\)|\(eiddo arall uwchben\))|\(annedd arall uwchben\)"
@@ -31,12 +58,19 @@ def roof_description_features(df):
         "another dwelling above",
     )
 
-    # .drop(columns=["ROOF_DESCRIPTION"], inplace=True)
-
     return df
 
 
 def walls_description_features(df):
+    """Extract walls features from WALLS_DESCRIPTION.
+    Note: This function will be added to the asf-core-data package as part of the processing pipeline.
+
+    Args:
+        df (pd.DataFrame): Dataframe including column WALLS_DESCRIPTION
+
+    Returns:
+        df (pd.DataFrame): Dataframe with additional walls features.
+    """
 
     df["WALL TYPE"] = df["WALLS_DESCRIPTION"].str.extract(
         r"(Cavity wall|Sandstone|Solid brick|Sandstone or limestone|System built|Timber frame|Granite or whin|Park home wall|Waliau ceudod|Gwenithfaen|\(other premises below\)|\(another dwelling below\)|\(anheddiad arall islaw\)|\(Same dwelling below\))"
@@ -52,12 +86,19 @@ def walls_description_features(df):
         r"(insulated|no insulation|filled cavity|with external insulation|with internal insulation|partial insulated)"
     )
 
-    # df.drop(columns=["WALLS_DESCRIPTION"], inplace=True)
-
     return df
 
 
 def floor_description_features(df):
+    """Extract floor features from FLOOR_DESCRIPTION.
+    Note: This function will be added to the asf-core-data package as part of the processing pipeline.
+
+    Args:
+        df (pd.DataFrame): Dataframe including column FLOOR_DESCRIPTION
+
+    Returns:
+        df (pd.DataFrame): Dataframe with additional floor features.
+    """
 
     df["FLOOR TYPE"] = df["FLOOR_DESCRIPTION"].str.extract(
         r"(Solid|Suspended|To unheated space|Solet|To external air)"
@@ -92,12 +133,19 @@ def floor_description_features(df):
         ["limited insulatio"], "partial insulated"
     )
 
-    # df.drop(columns=["FLOOR_DESCRIPTION"], inplace=True)
-
     return df
 
 
-def clean_description_features(df):
+def extract_features_from_desc(df):
+    """Extract detailed features from description features such as ROOF_DESCRIPTION (available for each category).
+    Note: Further functions, e.g. for WINDOWS, will be added in the future.
+
+    Args:
+        df (pd.DataFrame): Dataframe including description features.
+
+    Returns:
+        df (pd.DataFrame): Dataframe with new features added.
+    """
 
     df = roof_description_features(df)
     df = walls_description_features(df)
@@ -106,22 +154,96 @@ def clean_description_features(df):
     return df
 
 
-def computing_upgradability(df, verbose=False):
+def get_diff_in_energy_eff(df1, df2, keep="first", identifier="UPRN"):
+    """Get difference in energy efficiency between first to latest entry for all categories.
 
-    for cat in [
-        "ROOF",
-        "WINDOWS",
-        "WALLS",
-        "FLOOR",
-        "LIGHTING",
-        "HOT_WATER",
-        "MAINHEAT",
-    ]:
+    Args:
+        df1 (pd.DataFrame): Earliest/first property records, including ENERGY_EFF features.
+        df2 (pd.DataFrame): Latest property records, including ENERGY_EFF features.
+        keep (str, optional): Which to keep: earliest/first or latest. Defaults to "first".
+        identifier (str, optional): Unique property identifier. Defaults to "UPRN".
+
+    Returns:
+        df (pd.DataFrame): Dataframe with difference in energy efficiency for all categories.
+    """
+
+    quality_dict = {"Very Good": 5, "Good": 4, "Average": 3, "Poor": 2, "Very Poor": 1}
+
+    for cat in cats:
+
+        # Transform efficiency label to numeric score and compute difference
+        eff_feature = "{}_ENERGY_EFF".format(cat)
+        df1[eff_feature + "_NUM"] = df1[eff_feature].map(quality_dict)
+        df2[eff_feature + "_NUM"] = df2[eff_feature].map(quality_dict)
+
+        combo = pd.merge(
+            df1[[eff_feature + "_NUM", identifier]],
+            df2[[eff_feature + "_NUM", identifier]],
+            on=identifier,
+        )
+
+        combo[cat + "_EFF_DIFF"] = (
+            combo[eff_feature + "_NUM_y"] - combo[eff_feature + "_NUM_x"]
+        )
+
+        # Fill NaNs and fix negative values
+        combo[cat + "_EFF_DIFF"].fillna(0.0, inplace=True)
+        combo.loc[combo[cat + "_EFF_DIFF"] < 0.0, cat + "_EFF_DIFF"] = 0.0
+
+        # Keep first or latest records for further processing
+        if keep == "first":
+            df1 = pd.merge(
+                df1,
+                combo[[cat + "_EFF_DIFF", identifier]],
+                on=identifier,
+            )
+        else:
+            df2 = pd.merge(
+                df2,
+                combo[[cat + "_EFF_DIFF", identifier]],
+                on=identifier,
+            )
+
+    if keep == "first":
+        df = df1
+    else:
+        df = df2
+
+    # Mean energy efficiency
+    df["TOTAL_ENERGY_EFF_NUM"] = df[
+        [
+            "ROOF_ENERGY_EFF_NUM",
+            "WALLS_ENERGY_EFF_NUM",
+            "HOT_WATER_ENERGY_EFF_NUM",
+            "MAINHEAT_ENERGY_EFF_NUM",
+            "LIGHTING_ENERGY_EFF_NUM",
+            "FLOOR_ENERGY_EFF_NUM",
+            "WINDOWS_ENERGY_EFF_NUM",
+        ]
+    ].mean(axis=1)
+
+    return df
+
+
+def compute_upgradability(df, verbose=False):
+    """Compute upgradability for different categories, e.g. ROOF_UPGRADABILITY.
+    A property is considered upgradable in a specific category if an upgrade in that category could be observed or if there is an EPC recommendation for this category.
+
+    Args:
+        df (pd.DataFrame): Dataframe with recommendations and energy efficiency differences over time.
+        verbose (bool, optional): Whether to print summary about upgrades and recommendations. Defaults to False.
+
+    Returns:
+        df (pd.DataFrame): Dataframe with upgradability score features.
+    """
+
+    for cat in cats:
 
         total_props = df.shape[0]
         total_props_with_rec = df.loc[(df["{}_RECOMMENDATION".format(cat)])].shape[0]
         total_props_with_upgr = df.loc[(df["{}_EFF_DIFF".format(cat)] > 0)].shape[0]
 
+        # Energy efficiency difference or recommendation --> upgradable
         props_w_upgr_and_rec = df.loc[
             (
                 (df["{}_EFF_DIFF".format(cat)] > 0)
@@ -172,19 +294,27 @@ def computing_upgradability(df, verbose=False):
     return df
 
 
-def preprocess_features(wales_df):
+def get_upgrade_features(df):
+    """For properties with multiple records, get information about upgrades and upgradability score.
+
+    Args:
+        df (pd.DataFrame): Property features, including ENERGY_EFF and recommendations.
+
+    Returns:
+        upgrade_df (pd.DataFrame): Dataframe with additional upgrade features.
+    """
 
     # Clean features (to be moved to ASF core data)
-    wales_df = clean_description_features(wales_df)
+    df = extract_features_from_desc(df)
 
     # Only consider owner-occupied properties
-    wales_df = wales_df.loc[wales_df["TENURE"] == "owner-occupied"]
+    df = df.loc[df["TENURE"] == "owner-occupied"]
 
     # Get upgrade information based on properties with multiple entries
-    latest_wales = epc_data.filter_by_year(wales_df, None, selection="latest entry")
-    first_wales = epc_data.filter_by_year(wales_df, None, selection="first entry")
+    latest_df = epc_data.filter_by_year(df, None, selection="latest entry")
+    first_df = epc_data.filter_by_year(df, None, selection="first entry")
 
-    upgrade_df = upgrades.get_upgrade_features(first_wales, latest_wales, keep="first")
-    upgrade_df = computing_upgradability(upgrade_df)
+    upgrade_df = get_diff_in_energy_eff(first_df, latest_df, keep="first")
+    upgrade_df = compute_upgradability(upgrade_df)
 
     return upgrade_df

@@ -1,6 +1,7 @@
-# File: heat_pump_adoption_modelling/pipeline/encoding/feature_encoding.py
+# File: development_bankd_wales/pipeline/feature_preparation/feature_encoding.py
 """
 Encoding categorical features with ordinal and one-hot encoding.
+Note: this script will be integrated to asf-core-data.
 """
 
 # ----------------------------------------------------------------------------------
@@ -8,8 +9,6 @@ Encoding categorical features with ordinal and one-hot encoding.
 # Import
 import numpy as np
 import pandas as pd
-
-# from heat_pump_adoption_modelling.pipeline.encoding import category_reduction
 
 # ----------------------------------------------------------------------------------
 
@@ -109,15 +108,12 @@ eff_value_dict = {
 def create_efficiency_mapping(efficiency_set):
     """Create dict to map efficiency label(s) to numeric value.
 
-    Parameters
-    ----------
-    efficiency_set : list
-        List of efficiencies as encoded as strings.
+    Args:
+        efficiency_set (list): List of efficiencies as encoded as strings.
 
-    Return
-    ---------
-    efficiency_map : dict
-        Dict to map efficiency labels to numeric values."""
+    Returns:
+        efficiency_map (dict): Dict to map efficiency labels to numeric values.
+    """
 
     efficiency_map = {}
 
@@ -152,21 +148,13 @@ def create_efficiency_mapping(efficiency_set):
 def ordinal_encode_cat_features(df, features):
     """Ordinal encode given categorical features.
 
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        Dataframe including features to encode.
+    Args:
+        df (pd.DataFrame): Dataframe including features to encode.
+        features (list): Features to ordinal encode.
 
-    features: list
-        Features to ordinal encode.
-
-    Return
-    ---------
-    df : pandas.DataFrame
-        Dataframe with ordinal encoded features."""
-
-    # df["N_SAME_UPRN_ENTRIES"] = df["N_SAME_UPRN_ENTRIES"].replace(["5.0+"], 5)
-    # df["N_SAME_UPRN_ENTRIES"] = df["N_SAME_UPRN_ENTRIES"].astype("int")
+    Returns:
+        df (pd.DataFrame): Dataframe with ordinal encoded features.
+    """
 
     for feat in features:
 
@@ -189,18 +177,15 @@ def ordinal_encode_cat_features(df, features):
 def one_hot_encoding(df, features, limit=40, verbose=True):
     """One-hot encode given categorical features.
 
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        Dataframe including features to encode.
+    Args:
+        df (pd.DataFrame):  Dataframe including features to encode.
+        features (list): Features to ordinal encode.
+        limit (int, optional): _description_. Defaults to 40.
+        verbose (bool, optional): _description_. Defaults to True.
 
-    features: list
-        Features to ordinal encode.
-
-    Return
-    ---------
-    df : pandas.DataFrame
-        Dataframe with one-hot encoded features."""
+    Returns:
+         df (pd.DataFrame): Dataframe with one-hot encoded features
+    """
 
     if verbose:
         print("Before one hot encoding:", df.shape)
@@ -249,40 +234,23 @@ def feature_encoding_pipeline(
 ):
     """Pipeline for encoding ordinal and one-hot encoding of features.
 
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        Dataframe including features to encode.
+    Args:
+        df (pd.DataFrame): Dataframe including features to encode.
+        ordinal_features (list, optional): Features to ordinal encode. Defaults to ordinal_features.
+        onehot_features (list, optional): Features to one-hot encode.
+            If set to "auto", suitable features will be identified automatically.
+            To disable one-hot encoding, pass empty list or None. Defaults to "auto".
+        unaltered_features (list, optional): These variables will not be encoded. Defaults to ["LMK_KEY", "UPRN"].
+        drop_features (list, optional): Features to discard. Defaults to None.
+        verbose (bool, optional): Print encoding process. Defaults to False.
 
-    ordinal_features : list
-        Features to ordinal encode.
-
-    reduce_categories : bool, default=True
-        Whether or not merge categories of cateogrical features.
-
-    onehot_features : list, default="auto"
-        Features to one-hot encode.
-        If set to "auto", suitable features will be identified automatically.
-        To avoid one-hot encoding, use empty list or None.
-
-    unaltered_features : list, str, default=None
-        These variables will not be encoded.
-
-    drop_features : list, default=None
-        Features to discard.
-
-    Return
-    ---------
-    df : pandas.DataFrame
-        Updated and encoded dataframe."""
+    Returns:
+        df (pd.DataFrame): Updated and encoded dataframe.
+    """
 
     # Drop featuress
     if drop_features is not None:
         df = df.drop(columns=drop_features)
-
-    # Reduce/merge categories
-    # if reduce_categories:
-    #     df = category_reduction.reduce_number_of_categories(df)
 
     # Get all only numeric features
     num_features = df.select_dtypes(include=np.number).columns.tolist()

@@ -1,5 +1,3 @@
-FIGURE_OUT: "/outputs/figures/"
-
 EPC_FEAT_SELECTION:
   [
     "ADDRESS1",
@@ -67,7 +65,7 @@ EPC_FEAT_SELECTION:
     "LIGHTING_DESCRIPTION",
   ]
 
+FIGURE_OUT: "outputs/figures/"
 SUPERVISED_MODEL_FIG_PATH: "outputs/figures/"
-
 KEPLER_CONFIG_PATH: "outputs/kepler/configs/"
 KEPLER_MAP_PATH: "outputs/kepler/maps/"

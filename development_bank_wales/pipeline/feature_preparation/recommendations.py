@@ -1,3 +1,11 @@
+# File: development_bankd_wales/pipeline/feature_preparation/recommendations.py
+"""
+Encoding categorical features with ordinal and one-hot encoding.
+Note: this script will be integrated to asf-core-data.
+"""
+
+# ----------------------------------------------------------------------------------
+
 import numpy as np
 import pandas as pd
 
@@ -5,6 +13,8 @@ from asf_core_data.getters.epc import epc_data
 from asf_core_data.pipeline.preprocessing import preprocess_epc_data
 
 from development_bank_wales import PROJECT_DIR, get_yaml_config
+
+# ----------------------------------------------------------------------------------
 
 
 # Load config file
@@ -57,16 +67,15 @@ rec_cat_dict = {
 
 
 def get_bool_recom_features(df, unique_recs):
-
     """Get boolean recommendation features.
     New features indicate whether property received recommendations or not.
 
     Args:
-        df (pd.DataFrame): needs to include "IMPROVEMENT_ID_TEXT" and "LMK_KEY".
-        all_recs (list): list of unique default recommendations
+        df (pd.DataFrame): Needs to include "IMPROVEMENT_ID_TEXT" and "LMK_KEY".
+        unique_recs (_type_): List of unique default recommendations.
 
     Returns:
-        df (pd.DataFrame): updated df with boolean recommendation features.
+        df (pd.DataFrame): Updated df with boolean recommendation features.
 
     """
 
@@ -115,30 +124,31 @@ def load_epc_certs_and_recs(
     """Load EPC records and recommendations and merge into one dataframe.
 
     Args:
-        data_path (str/Path): path to EPC data.
-        subset (str): 'England', 'Scotland', 'Wales' or 'GB', defaults to 'GB'.
-        usecols (list): columns to use, default to selection defined in base config.
-        n_samples (int): number of samples to use, defaults to None.
-        remove_duplicates (bool): whether to remove duplicates, defauls to True.
+        data_path (str/Path): Path to ASF data source.
+        subset (str, optional): GB subset: 'England', 'Scotland', 'Wales' or 'GB'. Defaults to "GB".
+        usecols (list, optional): columns to use, default to selection defined in config = config["EPC_FEAT_SELECTION"].
+        n_samples (int, optional): Number of samples to use. Defaults to None, meaning all samples are loaded.
+        remove_duplicates (bool, optional): Whether to remove duplicates. Defaults to False.
+        reload (bool, optional): Reload and process EPC data. Defaults to True.
 
     Returns:
         epc_rec_df (pd.DataFrame): EPC records and recommendation data
-
     """
 
     if reload:
-        df = preprocess_epc_data.load_and_preprocess_epc_data(
+        epc_df = preprocess_epc_data.load_and_preprocess_epc_data(
             data_path=data_path,
             subset=subset,
             usecols=usecols,
             n_samples=n_samples,
             remove_duplicates=remove_duplicates,
+            save_data=None,
         )
 
     else:
 
         version = "preprocessed_dedupl" if remove_duplicates else "preprocessed"
-        df = epc_data.load_preprocessed_epc_data(
+        epc_df = epc_data.load_preprocessed_epc_data(
             data_path=data_path,
             batch="newest",
             version=version,
@@ -149,14 +159,15 @@ def load_epc_certs_and_recs(
 
     # Currently not implement for Scotland data
     if subset == "GB":
-        df = df.loc[df["COUNTRY"] != "Scotland"]
+        epc_df = epc_df.loc[epc_df["COUNTRY"] != "Scotland"]
 
-    recommendations = epc_data.load_england_wales_recommendations(
-        data_path=data_path, subset=subset
+    # Load recommendations (instead of certificates)
+    recommendations = epc_data.load_england_wales_data(
+        data_path=data_path, load_recs=True, subset=subset, data_check=False
     )
 
     # Rename feature for consistent processing later
-    df = df.rename(columns={"HOTWATER_DESCRIPTION": "HOT_WATER_DESCRIPTION"})
+    epc_df = epc_df.rename(columns={"HOTWATER_DESCRIPTION": "HOT_WATER_DESCRIPTION"})
 
     # Get all recommendations
     recs = list(recommendations["IMPROVEMENT_ID_TEXT"].unique())
@@ -168,11 +179,11 @@ def load_epc_certs_and_recs(
     )
 
     # Map recommendations to EPC records
-    df["RECOMMENDATIONS"] = df["LMK_KEY"].map(rec_dict)
+    epc_df["RECOMMENDATIONS"] = epc_df["LMK_KEY"].map(rec_dict)
 
-    df = get_bool_recom_features(df, recs)
+    epc_df = get_bool_recom_features(epc_df, recs)
 
-    return df
+    return epc_df
 
 
 def check_for_implemented_rec(rec, df1, df2, keep="first", identifier="UPRN"):
@@ -180,15 +191,14 @@ def check_for_implemented_rec(rec, df1, df2, keep="first", identifier="UPRN"):
     representing same properties over time.
 
     Args:
-        rec (str): recommendation
-        df1 (pd.DataFrame): earlier EPC data
-        df2 (pd.DataFrame): later EPC data
-        keep (str): "first" or "latest", defaults to "first".
-        identifier (str): property identifier, defaults to "UPRN".
+        rec (str): Recommendation.
+        df1 (pd.DataFrame): Earliest/first property records.
+        df2 (pd.DataFrame): Latest property records.
+        keep (str, optional): Which to keep: earliest/first or latest. Defaults to "first".
+        identifier (str, optional): _description_. Defaults to "UPRN".
 
     Returns:
         df (pd.DataFrame): EPC data with info on implementated recommendations.
-
     """
 
     # Merge two dataframes and check which ones had implemented recommendations

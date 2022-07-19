@@ -1,5 +1,10 @@
+# File: development_bank_wales/pipeline/feature_preparation/feature_selection.py
+"""Select features for different predictive models (differnet categories)."""
+
+# ---------------------------------------------------------------------------------
+
+
 roof_features = [
-    # "POSTCODE",
     "CURRENT_ENERGY_RATING",
     "POTENTIAL_ENERGY_RATING",
     "CURRENT_ENERGY_EFFICIENCY",
@@ -56,7 +61,6 @@ roof_features = [
 ]
 
 walls_features = roof_features = [
-    # "POSTCODE",
     "CURRENT_ENERGY_RATING",
     "POTENTIAL_ENERGY_RATING",
     "CURRENT_ENERGY_EFFICIENCY",
@@ -109,11 +113,9 @@ walls_features = roof_features = [
     "LIGHTING_ENERGY_EFF_SCORE",
     "FLOOR_ENERGY_EFF_SCORE",
     "WINDOWS_ENERGY_EFF_SCORE",
-    # "ROOF_UPGRADABILITY",
 ]
 
 floor_features = [
-    # "POSTCODE",
     "CURRENT_ENERGY_RATING",
     "POTENTIAL_ENERGY_RATING",
     "CURRENT_ENERGY_EFFICIENCY",
@@ -166,7 +168,6 @@ floor_features = [
     "LIGHTING_ENERGY_EFF_SCORE",
     "FLOOR_ENERGY_EFF_SCORE",
     "WINDOWS_ENERGY_EFF_SCORE",
-    # "ROOF_UPGRADABILITY",
 ]
 
 

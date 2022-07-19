@@ -1,23 +1,30 @@
+# File: development_bank_wales/pipeline/predictive_model/model_preparation.py
+"""
+Prepare the features and model before training.
+"""
+# ----------------------------------------------------------------------------------
+
 import pandas as pd
 import numpy as np
-from development_bank_wales.pipeline.feature_preparation import (
-    feature_selection,
-    one_hot_encoding,
-)
-
 
 from sklearn.base import BaseEstimator, TransformerMixin
-
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
 
+from development_bank_wales.pipeline.feature_preparation import (
+    feature_encoding,
+    feature_selection,
+)
+
+# ----------------------------------------------------------------------------------
+
 
 class FeatureSelection(BaseEstimator, TransformerMixin):
+    """Class for selecting the right features based on labels."""
+
     def __init__(self, label):
-        # self.something enables you to include the passed parameters
-        # as object attributes and use it in other methods of the class
         self.label = label
 
     def fit(self, X, y=None):
@@ -30,6 +37,8 @@ class FeatureSelection(BaseEstimator, TransformerMixin):
 
 
 class FeatureEncoding(BaseEstimator, TransformerMixin):
+    """Class for encoding the features while maintaining feature names."""
+
     def __init__(self, unaltered_features):
         self.unaltered_features = unaltered_features
         self.feature_list = None
@@ -38,7 +47,7 @@ class FeatureEncoding(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        X = one_hot_encoding.feature_encoding_pipeline(
+        X = feature_encoding.feature_encoding_pipeline(
             X, unaltered_features=self.unaltered_features
         )
         self.feature_list = list(X.columns)
@@ -46,6 +55,8 @@ class FeatureEncoding(BaseEstimator, TransformerMixin):
 
 
 class SampleBalancing(BaseEstimator, TransformerMixin):
+    """Class for balancing samples with binary labels."""
+
     def __init__(self, label, false_ratio, binary):
         self.label = label
         self.false_ratio = false_ratio
@@ -63,12 +74,13 @@ class SampleBalancing(BaseEstimator, TransformerMixin):
 
 
 class NumpyFeatures(BaseEstimator, TransformerMixin):
+    """Class for turning pd.DataFrame features into np.array features."""
+
     def fit(self, X, y=None):
         return self
 
     def transform(self, X, y=None):
         X = np.array(X)
-        # X = np.nan_to_num(X)
         return X
 
 
@@ -77,22 +89,17 @@ def balance_set(X, target_variable, false_ratio=0.8, binary=True):
     If false ratio set to 0.8, then 80% of the training data
     will have "False/No HP Installed" as a label.
 
-    Parameters
-    ----------
-    X: pandas.DataFrame
-        Training set.
+    Args:
+        X (pd.DataFrame): Training set.
+        target_variable (str): Variable/feature that is going to be predicted.
+        false_ratio (float, optional): How many False samples.
+            When re-balancing the set, use the false_ratio
+            to determine the amount of False labels. Defaults to 0.8.
+        binary (bool, optional): Binary labels. Defaults to True.
 
-    target_variable : str
-        Variable/feature that is going to be predicted.
-
-    false_ratio : float, default=0.8
-        When re-balancing the set, use the false_ratio
-        to determine the amount of False labels.
-
-    Return
-    ---------
-    X: pandas.DataFrame
-        Re-balanced training set."""
+    Returns:
+        X (pd.DataFrame): Re-balanced training set.
+    """
 
     multiplier = false_ratio / (1 - false_ratio)
 
@@ -100,6 +107,8 @@ def balance_set(X, target_variable, false_ratio=0.8, binary=True):
         # Seperate samples with and without heat pumps
         X_true = X.loc[X[target_variable] == True]
         X_false = X.loc[X[target_variable] == False]
+
+        # If zero vs. non-zero
     else:
         X_true = X.loc[X[target_variable] > 0.0]
         X_false = X.loc[X[target_variable] == 0.0]
@@ -119,12 +128,27 @@ def balance_set(X, target_variable, false_ratio=0.8, binary=True):
     return X
 
 
-def feature_preparation(features, label, pca=False):
+def feature_prep_pipeline(features, label, pca=False):
+    """Pipeline for preparing features for predictive model.
+    Pipeline includes sample balancing, feature selection and encoding,
+    as well as data imputing and scaling.
+
+    Args:
+        features (pd.DataFrame): Features (including label) as dataframe.
+        label (str): Label feature.
+        pca (bool, optional): Whether or not reduce dimensions with PCA. Defaults to False.
+
+    Returns:
+        features (np.array): Prepared features.
+        labels  (np.array): Labels.
+        feature_list (list): List of features (left after the pipeline).
+
+    """
 
     balancing_dict = {
         "ROOF_UPGRADABILITY": 0.75,
-        "WALLS_UPGRADABILITY": None,
-        "FLOOR_UPGRADABILITY": None,
+        "WALLS_UPGRADABILITY": None,  # balancing not necessary
+        "FLOOR_UPGRADABILITY": None,  # balancing not necessary
     }
 
     balance_ratio = balancing_dict[label]

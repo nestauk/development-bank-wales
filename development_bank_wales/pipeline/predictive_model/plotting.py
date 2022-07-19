@@ -1,13 +1,21 @@
-import matplotlib.pyplot as plt
-import numpy as np
+# File: development_bankd_wales/pipeline/predictive_model/plotting.py
+"""
+Create various charts for evaluating and studying predictive models.
+For example: plot feature coefficients or confusion matrix.
+"""
+# ----------------------------------------------------------------------------------
 
-from sklearn.decomposition import PCA, TruncatedSVD
-import sklearn
+
+import matplotlib.pyplot as plt
 import seaborn as sns
 
+import numpy as np
+import sklearn
 from sklearn.metrics import confusion_matrix
 
 from development_bank_wales import PROJECT_DIR, get_yaml_config, Path
+
+# ----------------------------------------------------------------------------------
 
 
 # Load config file
@@ -19,6 +27,15 @@ FIG_PATH = Path(PROJECT_DIR) / config["SUPERVISED_MODEL_FIG_PATH"]
 
 
 def get_most_important_coefficients(model, feature_names, title, X, top_features=10):
+    """Get features with strongest coefficients (both positive or negative).
+
+    Args:
+        model (sklearn.Model): Fitted sklearn model.
+        feature_names (list): List of feature names.
+        title (str): Plot title.
+        X (np,array): Training data.
+        top_features (int, optional): How many features to display on each side. Defaults to 10.
+    """
 
     if model.__class__.__name__ == "SVC":
         coef = model.coef_
@@ -28,10 +45,12 @@ def get_most_important_coefficients(model, feature_names, title, X, top_features
         coef2 = model.coef_.ravel() * X.std(axis=0)
         coef1 = coef2[: len(feature_names)]
 
+    # Get top coefficients
     top_positive_coefficients = np.argsort(coef1)[-top_features:]
     top_negative_coefficients = np.argsort(coef1)[:top_features]
     top_coefficients = np.hstack([top_negative_coefficients, top_positive_coefficients])
-    # create plot
+
+    # Create plot
     plt.figure(figsize=(15, 5))
     colors = ["red" if c < 0 else "blue" for c in coef1[top_coefficients]]
     plt.bar(
@@ -40,7 +59,9 @@ def get_most_important_coefficients(model, feature_names, title, X, top_features
         color=colors,
         align="center",
     )
+
     feature_names = np.array(feature_names)
+
     plt.xticks(
         np.arange(0, 2 * top_features),
         feature_names[top_coefficients],
@@ -58,16 +79,15 @@ def get_most_important_coefficients(model, feature_names, title, X, top_features
 def get_sorted_coefficients(classifier, feature_names):
     """Get features and coefficients sorted by coeffience strength in Linear SVM.
 
-    Parameter:
+    Args:
+        classifier (sklearn.model): Fitted sklearn model.
+        feature_names (list): List of feature names.
 
-        classifier (sklearn.svm._classes.LinearSVC) -- linear SVM classifier (has to be fitted!)
-        feature_names (list) -- feature names as list of strings
-
-    Return:
-
-        sort_idx (np.array) -- sorting array for features (feature with strongest coeffienct first)
-        sorted_coef (np.array) -- sorted coefficient values
-        sorted_fnames (list) -- feature names sorted by coefficient strength"""
+    Returns:
+        sort_idx (np.array): Sorting array for features (feature with strongest coeffienct first).
+        sorted_coef (np.array): Sorted coefficient values.
+        sorted_fnames (list): Feature names sorted by coefficient strength.
+    """
 
     # Sort the feature indices according absolute coefficients (highest coefficient first)
     sort_idx = np.argsort(-abs(classifier.coef_).max(axis=0))
@@ -84,12 +104,11 @@ def get_sorted_coefficients(classifier, feature_names):
 def plot_feature_coefficients(classifier, feature_names, label_set, title):
     """Plot the feature coefficients for each label given an SVM classifier.
 
-    Paramters:
-
-            classifier (sklearn.svm._classes.LinearSVC) -- linear SVM classifier (has to be fitted!)
-            feature_names (list) -- feature names as list of strings
-            label_set (list) -- label set as a list of strings
-    Return: None
+    Args:
+        classifier (sklearn.classifier_model): Fitted sklearn model.
+        feature_names (list): List of feature names.
+        label_set (list): List of ground truth labels.
+        title (str): Plot title.
     """
 
     # Layout settings depending un number of labels
@@ -190,13 +209,13 @@ def plot_confusion_matrix(
 ):
     """Plot the confusion matrix for different classes given correct labels and predictions.
 
-    Paramters:
-
-            solutions (np.array) -- correct labels
-            predictions (np.array) -- predicted labels
-            label_set (list) -- labels/classes to predict
-            title (string) -- plot title displayed above plot
-    Return: None"""
+    Args:
+        solutions (np.array) : Ground truth labels.
+        predictions (np.array): Predicted labels.
+        label_set (list, optional): Set list of labels. Defaults to None.
+        title (str, optional): Plot title. Defaults to "".
+        plot_type (str, optional): Whether to use "plt" or "searborn" style. Defaults to "plt".
+    """
 
     if plot_type == "plt":
 
@@ -249,7 +268,7 @@ def plot_confusion_matrix(
         matrix = matrix.astype("float") / matrix.sum(axis=1)[:, np.newaxis]
 
         # Build the plot
-        plt.figure(figsize=(16, 7))
+        plt.figure(figsize=(10, 7))
         sns.set(font_scale=1.4)
         sns.heatmap(
             matrix,
@@ -280,17 +299,13 @@ def plot_confusion_matrix(
 def plot_explained_variance(dim_reduction, title):
     """Plot percentage of variance explained by each of the selected components
     after performing dimensionality reduction (e.g. PCA, LSA).
-    Parameters
-    ----------
-    dim_reduction: sklearn.decomposition.PCA, sklearn.decomposition.TruncatedSVD
-        Dimensionality reduction on features with PCA or LSA.
-    title: str
-        Title for saving plot.
-    Return
-    ----------
-    None"""
 
-    # Explained variance ratio (how much is covered by how many components)
+    Explained variance ratio: how much is covered by how many components
+
+    Args:
+        dim_reduction (sklearn.decomposition): Dimensionality reduction on features with PCA or LSA.
+        title (_type_): Plot title.
+    """
 
     # Per component
     plt.plot(dim_reduction.explained_variance_ratio_)

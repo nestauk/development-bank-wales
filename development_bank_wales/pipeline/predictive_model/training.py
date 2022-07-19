@@ -1,16 +1,20 @@
-import sklearn
-from sklearn.model_selection import train_test_split
+# File: development_bankd_wales/pipeline/predictive_model/training.py
+"""
+Train and evaluate different predictive models.
+"""
+# ----------------------------------------------------------------------------------
 
-# Import the model we are using
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import SGDClassifier
 from sklearn import svm
 
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
-from development_bank_wales.pipeline.machine_learning import evaluation, plotting
+from development_bank_wales.pipeline.predictive_model import evaluation, plotting
+
+# ----------------------------------------------------------------------------------
 
 model_dict = {
     "Logistic Regression": LogisticRegression(random_state=42),
@@ -25,6 +29,21 @@ model_dict = {
 def train_and_evaluate_model(
     features, labels, model_name, label_name, feature_list, verbose=True
 ):
+    """Train and evaluate a predictive model.
+    Information about the training and evaluation process is printed by default.
+    The predicted probabilties for all features are returned.
+
+    Args:
+        features (np.array): Feature set used for training model.
+        labels (np.array): Ground truth labels.
+        model_name (str): Model to be used.
+        label_name (str): Name of the label ("what are we predicting").
+        feature_list (list): List of feature names.
+        verbose (bool, optional): Whether to print model, data and evaluation information. Defaults to True.
+
+    Returns:
+        probabilities (np.array): Probabilities (for binary classification task) for all features.
+    """
 
     train_features, test_features, train_labels, test_labels = train_test_split(
         features, labels, test_size=0.25, random_state=42, stratify=labels
@@ -76,6 +95,5 @@ def train_and_evaluate_model(
     )
 
     probabilities = model.predict_proba(features)
-    # features_df['proba {}'.format(label_name)] = probabilities[:, 1]
 
     return probabilities[:, 1]
