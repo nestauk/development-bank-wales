@@ -1,3 +1,11 @@
+# File: development_bank_wales/pipeline/feature_preparation/upgrades.py
+"""LEGACY: Legacy script for extracting features related to upgrades.
+Only used in initial analysis notebook.
+Note: script and category are used interchangeably."""
+
+# ---------------------------------------------------------------------------------
+
+
 import itertools
 import pandas as pd
 import numpy as np
@@ -32,6 +40,8 @@ def get_upgrade_features(df1, df2, keep="first", identifier="UPRN", verbose=Fals
      Features include energy efficiency improvements, transitions,
      general sector upgrades, possible sector upgrades, mean upgradability scores,
      mean energy efficiency and energy efficiency difference and whether there were any upgrades.
+
+     Only used in initial analysis.
 
 
     Args:
@@ -199,6 +209,7 @@ def get_upgrade_features(df1, df2, keep="first", identifier="UPRN", verbose=Fals
 
 def uprade_connections(df):
     """Generate a graph showing which sectors are frequently upgraded together.
+    Only used in initial analysis.
 
     Args:
          df (pd.DataFrame): dataframe with upgrade information.
@@ -209,6 +220,8 @@ def uprade_connections(df):
 
     # Create graph
     G = nx.Graph()
+
+    plt.rcParams["figure.figsize"] = (7, 7)
 
     # For all sector combinations,
     # get percentage of upgraded properties for which both sectors had upgrades
@@ -248,13 +261,15 @@ def uprade_connections(df):
 
     plt.tight_layout()
     plt.show()
-    file_path = PROJECT_DIR / config["FIGURE_OUT"] / "Upgrade_connections.png"
+
+    file_path = Path(PROJECT_DIR) / config["FIGURE_OUT"] / "Upgrade_connections.png"
 
     plt.savefig(file_path, format="PNG")
 
 
 def get_sector_info_by_area(df, agglo_f, include_imd=True):
     """Add aggregated features (average scores) by area for each sector.
+    Only used in intial anlysis.
 
     Args:
          df (pd.DataFrame): dataframe with upgrade information.
