@@ -232,7 +232,7 @@ def feature_encoding_pipeline(
     drop_features=None,
     verbose=False,
 ):
-    """Pipeline for encoding ordinal and one-hot encoding of features.
+    """Pipeline for encoding ordinal features and one-hot encoding categorical features.
 
     Args:
         df (pd.DataFrame): Dataframe including features to encode.
@@ -240,7 +240,8 @@ def feature_encoding_pipeline(
         onehot_features (list, optional): Features to one-hot encode.
             If set to "auto", suitable features will be identified automatically.
             To disable one-hot encoding, pass empty list or None. Defaults to "auto".
-        unaltered_features (list, optional): These variables will not be encoded. Defaults to ["LMK_KEY", "UPRN"].
+        unaltered_features (list, optional): Variables that should not be encoded.
+            Defaults to ["LMK_KEY", "UPRN"].
         drop_features (list, optional): Features to discard. Defaults to None.
         verbose (bool, optional): Print encoding process. Defaults to False.
 

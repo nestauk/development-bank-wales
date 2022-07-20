@@ -1,5 +1,5 @@
-# File: development_bank_wales/pipeline/feature_preparation/feature_enginnering.py
-"""Extract new features from original features."""
+# File: development_bank_wales/pipeline/feature_preparation/feature_engineering.py
+"""Extract new features from original description features, e.g. ROOF_DESCRIPTION."""
 
 # ---------------------------------------------------------------------------------
 
@@ -25,7 +25,7 @@ def roof_description_features(df):
     Note: This function will be added to the asf-core-data package as part of the processing pipeline.
 
     Args:
-        df (pd.DataFrame): Dataframe including column ROOF_DESCRIPTION
+        df (pd.DataFrame): Dataframe including column ROOF_DESCRIPTION.
 
     Returns:
         df (pd.DataFrame): Dataframe with additional roof features.
@@ -66,7 +66,7 @@ def walls_description_features(df):
     Note: This function will be added to the asf-core-data package as part of the processing pipeline.
 
     Args:
-        df (pd.DataFrame): Dataframe including column WALLS_DESCRIPTION
+        df (pd.DataFrame): Dataframe including column WALLS_DESCRIPTION.
 
     Returns:
         df (pd.DataFrame): Dataframe with additional walls features.
@@ -94,7 +94,7 @@ def floor_description_features(df):
     Note: This function will be added to the asf-core-data package as part of the processing pipeline.
 
     Args:
-        df (pd.DataFrame): Dataframe including column FLOOR_DESCRIPTION
+        df (pd.DataFrame): Dataframe including column FLOOR_DESCRIPTION.
 
     Returns:
         df (pd.DataFrame): Dataframe with additional floor features.
@@ -137,7 +137,8 @@ def floor_description_features(df):
 
 
 def extract_features_from_desc(df):
-    """Extract detailed features from description features such as ROOF_DESCRIPTION (available for each category).
+    """Extract detailed features from description features such as ROOF_DESCRIPTION (available
+    for each category).
     Note: Further functions, e.g. for WINDOWS, will be added in the future.
 
     Args:
@@ -227,11 +228,13 @@ def get_diff_in_energy_eff(df1, df2, keep="first", identifier="UPRN"):
 
 def compute_upgradability(df, verbose=False):
     """Compute upgradability for different categories, e.g. ROOF_UPGRADABILITY.
-    A property is considered upgradable in a specific category if an upgrade in that category could be observed or if there is an EPC recommendation for this category.
+    A property is considered upgradable in a specific category if an upgrade in that category
+    could be observed or if there is an EPC recommendation for this category.
 
     Args:
         df (pd.DataFrame): Dataframe with recommendations and energy efficiency differences over time.
-        verbose (bool, optional): Whether to print summary about upgrades and recommendations. Defaults to False.
+        verbose (bool, optional): Whether to print summary about upgrades and recommendations.
+        Defaults to False.
 
     Returns:
         df (pd.DataFrame): Dataframe with upgradability score features.

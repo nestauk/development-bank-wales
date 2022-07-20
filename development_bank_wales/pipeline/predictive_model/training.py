@@ -69,14 +69,20 @@ def train_and_evaluate_model(
     baseline = evaluation.get_baseline(test_labels.shape[0], true_rate)
 
     if verbose:
-        print("\nBaseline\n************")
+        print("\nBaseline: \n************")
         evaluation.print_metrics(test_labels, baseline)
 
-        print("\nTraining Set\n************")
-        evaluation.print_metrics(train_labels, y_pred_train)
+        print("\nTraining Set:\n************\n")
+        evaluation.print_cross_validation(
+            model_dict[model_name], train_features, train_labels, cv=5
+        )
+        # evaluation.print_metrics(train_labels, y_pred_train)
 
-        print("\nTest Set\n************")
-        evaluation.print_metrics(test_labels, y_pred_test)
+        print("\nTest Set:\n************\n")
+        evaluation.print_cross_validation(
+            model_dict[model_name], test_features, test_labels, cv=5
+        )
+        # evaluation.print_metrics(test_labels, y_pred_test)
 
     plotting.plot_confusion_matrix(
         test_labels,

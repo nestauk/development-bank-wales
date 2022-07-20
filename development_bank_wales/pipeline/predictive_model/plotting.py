@@ -102,7 +102,7 @@ def get_sorted_coefficients(classifier, feature_names):
 
 
 def plot_feature_coefficients(classifier, feature_names, label_set, title):
-    """Plot the feature coefficients for each label given an SVM classifier.
+    """Plot the feature coefficients for each label given a classification model.
 
     Args:
         classifier (sklearn.classifier_model): Fitted sklearn model.
@@ -279,7 +279,6 @@ def plot_confusion_matrix(
         )
 
         # Add labels to the plot
-        class_names = ["Not upgradable", "Upgradable"]
         tick_marks = np.arange(len(label_set))
         tick_marks2 = tick_marks + 0.5
         plt.xticks(tick_marks, label_set, rotation=25)
@@ -304,7 +303,7 @@ def plot_explained_variance(dim_reduction, title):
 
     Args:
         dim_reduction (sklearn.decomposition): Dimensionality reduction on features with PCA or LSA.
-        title (_type_): Plot title.
+        title (str): Plot title.
     """
 
     # Per component

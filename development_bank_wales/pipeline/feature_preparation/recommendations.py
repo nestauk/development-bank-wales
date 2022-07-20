@@ -1,7 +1,7 @@
 # File: development_bankd_wales/pipeline/feature_preparation/recommendations.py
 """
-Encoding categorical features with ordinal and one-hot encoding.
-Note: this script will be integrated to asf-core-data.
+Loading and processing recommendations to make them easily accessible as features.
+For example, get boolean features for each recommendation/recommendation category and property.
 """
 
 # ----------------------------------------------------------------------------------
@@ -125,9 +125,9 @@ def load_epc_certs_and_recs(
 
     Args:
         data_path (str/Path): Path to ASF data source.
-        subset (str, optional): GB subset: 'England', 'Scotland', 'Wales' or 'GB'. Defaults to "GB".
-        usecols (list, optional): columns to use, default to selection defined in config = config["EPC_FEAT_SELECTION"].
-        n_samples (int, optional): Number of samples to use. Defaults to None, meaning all samples are loaded.
+        subset (str, optional): GB subset: 'England','Wales' or 'GB'. Defaults to "GB".
+        usecols (list, optional): columns to use, default to selection defined in config.
+        n_samples (int, optional): Number of samples to use. Defaults to None, so all samples are loaded.
         remove_duplicates (bool, optional): Whether to remove duplicates. Defaults to False.
         reload (bool, optional): Reload and process EPC data. Defaults to True.
 
@@ -195,7 +195,7 @@ def check_for_implemented_rec(rec, df1, df2, keep="first", identifier="UPRN"):
         df1 (pd.DataFrame): Earliest/first property records.
         df2 (pd.DataFrame): Latest property records.
         keep (str, optional): Which to keep: earliest/first or latest. Defaults to "first".
-        identifier (str, optional): _description_. Defaults to "UPRN".
+        identifier (str, optional): Unique identifier for property. Defaults to "UPRN".
 
     Returns:
         df (pd.DataFrame): EPC data with info on implementated recommendations.

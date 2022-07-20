@@ -1,7 +1,7 @@
-# File: development_bank_wales/pipeline/feature_preparation/upgrades.py
+# File: development_bank_wales/pipeline/feature_preparation/legacy/upgrades.py
 """LEGACY: Legacy script for extracting features related to upgrades.
-Only used in initial analysis notebook.
-Note: script and category are used interchangeably."""
+Only used in initial analysis notebook. No need to review in detail.
+Note: sector and category are used interchangeably here."""
 
 # ---------------------------------------------------------------------------------
 
@@ -214,7 +214,7 @@ def uprade_connections(df):
     Args:
          df (pd.DataFrame): dataframe with upgrade information.
 
-     Returns: None
+    Returns: None
 
     """
 

@@ -6,6 +6,7 @@ Evaluation of predictive model.
 
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, recall_score, precision_score
+from sklearn.model_selection import cross_val_score
 
 # ----------------------------------------------------------------------------------
 
@@ -27,6 +28,28 @@ def print_metrics(labels, predictions):
     print("F1 score:\t{}%".format(f1))
     print("Recall:\t\t{}%".format(precision))
     print("Precision:\t{}%".format(recall))
+
+
+def print_cross_validation(model, X, y, cv=5):
+    """Print cross validation results.
+
+    Args:
+        model (sklearn.model): Unfitted model.
+        X (np.array): Features.
+        y (np.array): Labels.
+        cv (int, optional): How many cross validations. Defaults to 5.
+    """
+
+    acc = cross_val_score(model, X, y, cv=cv, scoring="accuracy")
+    f1 = cross_val_score(model, X, y, cv=cv, scoring="f1")
+    precision = cross_val_score(model, X, y, cv=cv, scoring="precision")
+    recall = cross_val_score(model, X, y, cv=cv, scoring="recall")
+
+    print("5-fold Cross Validation\n-------------------------\n")
+    print("Accuracy:\t{:0.2f}%".format(acc.mean() * 100))
+    print("F1 Score:\t{:0.2f}%".format(f1.mean() * 100))
+    print("Recall:\t\t{:0.2f}%".format(recall.mean() * 100))
+    print("Precision:\t{:0.2f}%".format(precision.mean() * 100))
 
 
 def get_baseline(n_samples, true_rate):

@@ -1,6 +1,6 @@
 # File: development_bank_wales/pipeline/predictive_model/model_preparation.py
 """
-Prepare the features and model before training.
+Prepare the features and model before training, including pipeline for easy processing.
 """
 # ----------------------------------------------------------------------------------
 
@@ -132,6 +132,7 @@ def feature_prep_pipeline(features, label, pca=False):
     """Pipeline for preparing features for predictive model.
     Pipeline includes sample balancing, feature selection and encoding,
     as well as data imputing and scaling.
+    The pipeline also captures the feature names (as after one-hot encoding).
 
     Args:
         features (pd.DataFrame): Features (including label) as dataframe.

@@ -19,8 +19,8 @@ def pcl_gaussian_smooth(dists, vals, sg_percentile=1.7):
         vals (np.array): ndarray of shape (n_pts, n_dims)
              Values to be smoothed defined for each point. The different dimensions
             are smoothed independently.
-        sg_percentile (float, optional): To determine the sigma (sg) of the Gaussian, the n-th percentile of
-            all distances in dists is used. This value specifies that n. Defaults to 1.7.
+        sg_percentile (float, optional): To determine the sigma (sg) of the Gaussian, the n-th percentile
+            of all distances in dists is used. This value specifies that n. Defaults to 1.7.
 
     Returns:
         smooth: ndarray of shape (n_pts, n_dims). Smoothed version of `vals`.
@@ -53,13 +53,15 @@ def get_smoothed_labels(
     features, labels, n_samples=10000, flip_indices=False, random_state=42
 ):
     """Compute feature distances and get smoothed labels, given features and labels.
+    Optionally, flip True samples to False to study effect.
 
     Args:
         features (np.array): Features for creating feature space and computing distances.
         labels (np.array): Original labels to be smoothed.
         n_samples (int, optional): Number of samples to use.
             Caution: computing distances is computationally expensive. Defaults to 10000.
-        flip_indices (bool, optional): Whether or not flip 1/100th of the samples from True to False. Defaults to False.
+        flip_indices (bool, optional): Whether or not to flip every 1/100 of all True samples to False.
+            Defaults to False.
         random_state (int, optional): Random state for consistent results. Defaults to 42.
 
     Returns:
@@ -77,11 +79,11 @@ def get_smoothed_labels(
     features = features[:n_samples]
     labels = labels[:n_samples]
 
-    # Flip 1/100 of samples from True to False
+    # Flip 1/100 of True samples from True to False
     if flip_indices:
 
         flipped_indices = rand.choice(
-            np.where(labels)[0], round(n_samples / 1000), replace=False
+            np.where(labels)[0], round(n_samples / 100), replace=False
         )
         labels[flipped_indices] = False
 

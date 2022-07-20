@@ -1,4 +1,4 @@
-# File: development_bank_wales/pipeline/feature_preparation/data_aggregregation.py
+# File: development_bank_wales/pipeline/feature_preparation/data_aggregation.py
 """Aggregate data on hex or local authority level."""
 
 # ---------------------------------------------------------------------------------
@@ -18,14 +18,14 @@ def get_supplementary_data(df, data_path="S3"):
     """Get coordinates and IMD data. Geographical data is required for aggregation.
 
     Args:
-        df (pd.DataFrame): Dataframe that supplementary data is added to.
+        df (pd.DataFrame): Dataframe to which supplementary data is added.
         data_path (str, optional): Data source: local dir or S3. Defaults to "S3".
 
     Returns:
         df_suppl: Dataframe with added supplementary data.
     """
 
-    # Get coordinates and hex ids
+    # Get coordinates and hex ids: resolution of 6 equals 36km2
     coordinates_df = coordinates.get_postcode_coordinates(data_path=data_path)
     df_suppl = pd.merge(df, coordinates_df, on="POSTCODE", how="left")
     df_suppl = data_agglomeration.add_hex_id(df_suppl, resolution=6)
@@ -44,10 +44,10 @@ def get_supplementary_data(df, data_path="S3"):
 
 def get_mean_per_group(features_df, label_set, agglo_f="hex_id"):
     """Get mean upgrade probability for each group, e.g. hex id or local authority label.
-    Furthermore, compute the IMD mean and number of properties per group.
+    Additionally, compute the IMD mean and number of properties per group.
 
     Args:
-        features_df (pd.DataFrame): _description_
+        features_df (pd.DataFrame): Features including upgrade probabilities, e.g. ROOF_proba.
         label_set (list): Label list, e.g. upgrade categories ROOF, WALLS or FLOOR.
         agglo_f (str, optional): Feature by which to group. Defaults to "hex_id".
 
@@ -113,7 +113,7 @@ def get_aggregated_upgrade_data(df, agglo_f="hex_id"):
     Only keep one sample per hex (as they all hold the same information after grouping).
 
     Args:
-        df (pd.DataFrame): Dataframe including information about upgrades, energy efficiency etc. for each property.
+        df (pd.DataFrame): Property features including nformation about upgrades, energy efficiency etc.
         agglo_f (str, optional): Feature by which to group. Defaults to "hex_id".
 
     Returns:
