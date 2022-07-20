@@ -111,6 +111,10 @@ target/
 /outputs/models/*
 !/outputs/models/*.md
 /outputs/figures*
+!/outputs/figures/kepler/configs*
+/outputs/img*
+
+/backup/*
 
 /development_bank_wales/analysis/Recycling/*
 
