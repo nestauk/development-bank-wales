@@ -17,12 +17,38 @@
 # %% [markdown]
 # # Initial Analysis of Recommendations and Upgrades for DBW Project
 #
-# Last updated: 19 July 2022
+# Last updated: 20 July 2022 by Julia Suter
 #
-# This notebook demonstrates the initial analysis of recommendations and other EPC data for the DBW project. The actual upgradability model is introduced in another notebook.
+# ### Structure of Notebook<a id='top'></a>
+#
+# [**Welcome to the Playground**](#notebook)
+#
+# [**Loading the EPC data**](#loading)
+#
+# [**Recommendations**](#recs)
+# - [What can the data tell us](#recs_basics)
+# - [Recommendations over time](#recs_over_time)
+#
+# [**Upgrades and Upgradability**](#upgradability)
+# - [What can the data tell us](#upgradability_basics)
+# - [Upgrade network](#upgrade_network)
+# - [Transitions](#transitions)
+#
+# [**Kepler Maps**](#kepler)
+# - [Geographical and IMD data](#supp_data)
+# - [Upgradability map](#upgradability_map)
+# - [Upgradability map by Local Authority](#upgradability_map_LA)
+# - [Energy efficiency map](#en_eff)
+# - [Rating difference map](#rating_diff)
+#
+#
+# ## Welcome to the Playground
+#
+# This notebook demonstrates the initial analysis of recommendations and other EPC data for the DBW project. The actual upgradability model is introduced in another notebook. Consider this a playground.
 #
 # **Note for reviewer**:
 # This notebook does not have to be reviewed in much detail. Please just check whether everything runs smoothly.
+#
 
 # %%
 # %load_ext autoreload
@@ -55,9 +81,10 @@ from keplergl import KeplerGl
 from ipywidgets import interact, fixed
 
 # %% [markdown]
-# ## Loading the data
+# ## Loading the data<a id='loading'></a>
+# [[back to top]](#top)
 #
-# The first time, this takes about 5min. Time for a quick break!
+# When executed the very first time, the EPC data is loaded from S3 and saved in `/outputs/data/`. This takes about 5min. After that, the data will be loaded from the local directory (<30 secs).
 
 # %%
 output_path = PROJECT_DIR / "outputs/data/wales_epc_with_recs.csv"
@@ -82,11 +109,14 @@ else:
     print("Done!")
 
 # %% [markdown]
-# ## Recommendations
+# ## Recommendations<a id='recs'></a>
+# [[back to top]](#top)
 #
-# There's 41 different default recommendations in the Wales EPC Register. 85% of all records have at least one recommendation.
+# ### What can the data tell us<a id='recs_basics'></a>
 #
-# The auto-generated plots show the relation of difference recommendations to property characteristics, e.g. property type or construction age band. For example, only houses and bungalows ever receive a recommendation for solar water heating. The charts can be polished if ever needed.
+# There are 41 different default recommendations in the Wales EPC Register. 85% of all records have at least one recommendation.
+#
+# The auto-generated plots show the relation of different recommendations to various property characteristics, e.g. property type or construction age band. For example, only houses and bungalows ever receive a recommendation for solar water heating. The charts can be polished if ever needed.
 
 # %%
 unique_recs = [col for col in wales_df.columns if col.startswith("Rec:")]
@@ -109,6 +139,7 @@ def plot_recommendations(rec):
         rec,
         plotting_colors="copper",
         x_tick_rotation=45,
+        figsize=(7, 5),
         fig_save_path=fig_output_path,
     )
     easy_plotting.plot_subcats_by_other_subcats(
@@ -117,6 +148,7 @@ def plot_recommendations(rec):
         rec,
         plotting_colors="copper",
         x_tick_rotation=45,
+        figsize=(7, 5),
         fig_save_path=fig_output_path,
     )
     easy_plotting.plot_subcats_by_other_subcats(
@@ -125,6 +157,7 @@ def plot_recommendations(rec):
         rec,
         plotting_colors="copper",
         x_tick_rotation=45,
+        figsize=(7, 5),
         fig_save_path=fig_output_path,
     )
     easy_plotting.plot_subcats_by_other_subcats(
@@ -133,6 +166,7 @@ def plot_recommendations(rec):
         rec,
         plotting_colors="copper",
         x_tick_rotation=45,
+        figsize=(7, 5),
         fig_save_path=fig_output_path,
     )
     easy_plotting.plot_subcats_by_other_subcats(
@@ -141,6 +175,7 @@ def plot_recommendations(rec):
         rec,
         plotting_colors="copper",
         x_tick_rotation=45,
+        figsize=(7, 5),
         fig_save_path=fig_output_path,
     )
     easy_plotting.plot_subcats_by_other_subcats(
@@ -149,14 +184,16 @@ def plot_recommendations(rec):
         rec,
         plotting_colors="copper",
         x_tick_rotation=45,
+        figsize=(7, 5),
         fig_save_path=fig_output_path,
     )
 
 
 # %% [markdown]
-# ### Recommendations over Time
+# ### Recommendations over Time<a id='recs_over_time'></a>
+# [[back to top]](#top)
 #
-# Looking at properties with multiple records over time, we can estimate which upgrades are often carried out and which recommendations are implemented, although this is not a water-proof solution, of course.
+# Looking at properties with multiple records over time, we can estimate which upgrades are often carried out and which recommendations are implemented. Note that this only an approximation as we do not hold information for all properties, and only one record for many.
 
 # %%
 wales_df = wales_df.loc[wales_df["TENURE"] == "owner-occupied"]
@@ -205,6 +242,7 @@ def plot_recommendations(rec, first_wales, latest_wales):
         "IMPLEMENTED_" + rec,
         plotting_colors="copper",
         x_tick_rotation=45,
+        figsize=(7, 5),
         fig_save_path=fig_output_path,
     )
     easy_plotting.plot_subcats_by_other_subcats(
@@ -213,6 +251,7 @@ def plot_recommendations(rec, first_wales, latest_wales):
         "IMPLEMENTED_" + rec,
         plotting_colors="copper",
         x_tick_rotation=45,
+        figsize=(7, 5),
         fig_save_path=fig_output_path,
     )
     easy_plotting.plot_subcats_by_other_subcats(
@@ -221,6 +260,7 @@ def plot_recommendations(rec, first_wales, latest_wales):
         "IMPLEMENTED_" + rec,
         plotting_colors="copper",
         x_tick_rotation=45,
+        figsize=(7, 5),
         fig_save_path=fig_output_path,
     )
     easy_plotting.plot_subcats_by_other_subcats(
@@ -229,6 +269,7 @@ def plot_recommendations(rec, first_wales, latest_wales):
         "IMPLEMENTED_" + rec,
         plotting_colors="copper",
         x_tick_rotation=45,
+        figsize=(7, 5),
         fig_save_path=fig_output_path,
     )
     easy_plotting.plot_subcats_by_other_subcats(
@@ -237,14 +278,22 @@ def plot_recommendations(rec, first_wales, latest_wales):
         "IMPLEMENTED_" + rec,
         plotting_colors="copper",
         x_tick_rotation=45,
+        figsize=(7, 5),
         fig_save_path=fig_output_path,
     )
 
 
 # %% [markdown]
-# ## Upgradability (simple version)
+# ## Upgrades and Upgradability<a id='upgradability'></a>
+# [[back to top]](#top)
 #
+#
+# ### What can the data tell us <a id='upgradability_basics'></a>
 # We measure upgradability based on whether a property has had an improvement in a specific category or whether there has been a recommendation.
+#
+# The most upgrades happen in the category 'lighting' since it's the easiest one. There are hardly any (recorded) upgrades done to the floor of a property, as it is a real hassle.
+#
+# Mainheat, hot water and lighting are most frequently recommended to be upgraded. When only looking at properties with specific recommendation, then lighting, roof and windows are more frequently upgraded.
 
 # %%
 first_wales_w_upgrades = upgrades.get_upgrade_features(
@@ -326,8 +375,8 @@ upgrade_df.head(10)
 @interact(
     cat=cats,
     feature=[
-        "BUILT_FORM",
         "PROPERTY_TYPE",
+        "BUILT_FORM",
         "CONSTRUCTION_AGE_BAND",
         "TRANSACTION_TYPE",
     ],
@@ -345,17 +394,19 @@ def plotting(cat, feature):
 
 
 # %% [markdown]
-# ### Upgrade Network
+# ### Upgrade Network<a id='upgrade_network'></a>
+# [[back to top]](#top)
 #
-# Which upgrades often happen at the same time?
+# This network shows which upgrades often happen at the same time. Of all the properties with any upgrades, 23% have had an upgrade of lighting and roof.
 
 # %%
 upgrades.uprade_connections(first_wales_w_upgrades)
 
 # %% [markdown]
-# ## Transitions
+# ## Transitions<a id='transitions'></a>
+# [[back to top]](#top)
 #
-# Currently, we don't work with transitions but we could analyse them if ever required.
+# The transitions show the description of a category before and after an upgrade. Not further pursued at the moment.
 
 # %%
 pd.set_option("display.max_rows", 5000)
@@ -375,8 +426,14 @@ def get_transitions(cat):
 
 
 # %% [markdown]
-# ## Geographical and IMD Data
+# ## Kepler Maps<a id='kepler'></a>
+# [[back to top]](#top)
 #
+# Kepler maps showing upgradability, efficiency and rating difference over time. Not used in that form in the final analysis.
+#
+#
+# ### Geographical and IMD Data
+# <a id='supp_data'></a>
 # Add geographical data and information about deprivation.
 
 # %%
@@ -386,11 +443,8 @@ first_wales_suppl = data_aggregation.get_supplementary_data(
 first_wales_suppl.head()
 
 # %% [markdown]
-# ## Kepler Maps
-#
-# Kepler maps showing upgradability, efficiency and rating difference over time. Not used in that form in the final analysis.
-#
-# ### Upgradability
+# ### Upgradability<a id='upgradability_map'></a>
+# [[back to top]](#top)
 
 # %%
 kepler_df = data_aggregation.get_aggregated_upgrade_data(first_wales_suppl, "hex_id")
@@ -434,6 +488,8 @@ kepler.save_map(upgrade_map, "Upgrades.html", data_path=PROJECT_DIR)
 
 # %% [markdown]
 # ### Upgradability by Local Authority
+# <a id='upgradability_map_by_LA'></a>
+# [[back to top]](#top)
 
 # %%
 kepler_df = data_aggregation.get_aggregated_upgrade_data(
@@ -491,6 +547,8 @@ kepler.save_map(upgrade_map, "LA_Upgrades.html", data_path=PROJECT_DIR)
 
 # %% [markdown]
 # ## Energy Efficiency
+# <a id='en_eff'></a>
+# [[back to top]](#top)
 
 # %%
 kepler_df = data_aggregation.get_aggregated_upgrade_data(first_wales_suppl, "hex_id")
@@ -534,7 +592,8 @@ kepler.save_config(upgrade_map, "efficiencies.txt", data_path=PROJECT_DIR)
 kepler.save_map(upgrade_map, "Efficiencies.html", data_path=PROJECT_DIR)
 
 # %% [markdown]
-# ## Rating Diff
+# ## Rating Diff<a id='rating_diff'></a>
+# [[back to top]](#top)
 
 # %%
 kepler_df = data_aggregation.get_aggregated_upgrade_data(first_wales_suppl, "hex_id")
