@@ -21,7 +21,7 @@
 #
 # ### Structure of Notebook<a id='top'></a>
 #
-# [**Why Gaussian Smoothing**](why)
+# [**Why Gaussian Smoothing**](#why)
 #
 # [**Loading and Preparing the Data**](#loading)
 # - [Loading the data](#loading_data)
@@ -62,7 +62,7 @@
 # </div>
 
 # %% [markdown]
-# ## Loading and preparing the data<a id='loading'></a>
+# ## Loading and Preparing the Data<a id='loading'></a>
 # [[back to top]](#top)
 
 # %%
@@ -172,7 +172,7 @@ print("Testing Features Shape:", test_features.shape)
 print("Testing Labels Shape:", test_labels.shape)
 
 # %% [markdown]
-# ## Gaussian smoothing<a id='gaussian'></a>
+# ## Gaussian Smoothing<a id='gaussian'></a>
 # [[back to top]](#top)
 #
 # Apply gaussian smoothing to the original labels. As a sanity check, test whether a set of properties with an original 'True' label end up on the higher uprgradability side of the distribution if they are flipped to False and put through Gaussian smoothing. This shows that a False label can be "corrected" if a property is close to upgraded properties in the feature space.
@@ -191,9 +191,9 @@ sm_labels_flp, labels_flp, flp_idx = gaussian_smoothing.get_smoothed_labels(
 # ### Flipping labels<a id='histo'></a>
 # [[back to top]](#top)
 #
-# When looking at the properties originally labeled as 'not upgradable', we see that there seems to be a split of the data into two peaks (around 0.27). We expect that most properties with flipped labels (from True to False) will come out at the second peak (higher ugradability) of the distribution, proving that Gaussian smoothing can raise the upgradability score of a "non upgradable" property that is very similar to the upgraded ones.
+# When looking at the properties originally labeled as 'not upgradable', we see that there seems to be a split of the data into two peaks (around 0.28). We expect that most properties with flipped labels (from True to False) will come out at the second peak (higher ugradability) of the distribution, proving that Gaussian smoothing can raise the upgradability score of a "non upgradable" property that is very similar to the upgraded ones.
 #
-# We evaluate by flipping 5 different sets of 100 samples. On average, 68.8% of the flipped samples end up in the top third of upgradable properties.
+# We evaluate by flipping 5 different sets of 100 samples. On average, 69% of the flipped samples end up in the top third of upgradable properties.
 
 # %%
 plt.hist(smoothed_labels, bins=100)
@@ -241,14 +241,14 @@ for i in range(5):
         test_labels,
         n_samples=n_samples,
         flip_indices=True,
-        random_state=i,
+        random_state=42 + i,
     )
 
     high_upr_ratio = sm_labels_flp[flp_idx] > np.percentile(sm_labels_flp, percentile)
     high_upr_ratio = high_upr_ratio.sum() / high_upr_ratio.shape[0] * 100
 
     print(
-        "{}) Flipped samples that come out in top third? {}%".format(
+        "{} Flipped samples that come out in top third? {}%".format(
             i + 1, high_upr_ratio
         )
     )
@@ -337,16 +337,16 @@ fig.savefig(fig_output_path / "Feature_space_flipped_samples.png")
 #
 # Gaussian smoothing is not ideal for predicting the upgradability of new samples as it is an unsupervised model. However, we can compare the Gaussian labels to the output of a predictive model (Logistic regression) to study the difference between competence and performance.
 #
-# To imitiate 'Gaussian predictions', we consider the top 25% of all properties with highest upgradability "upgradable", no matter the original label. That approach yields an accuracy of 76% compared to 82% with logistic regression model, meaning that there is a clear difference between the two models.
+# To imitiate 'Gaussian predictions', we consider the top 25% of all properties with highest upgradability "upgradable", no matter the original label. That approach yields an accuracy of 75.7% compared to 81.8% with logistic regression model, meaning that there is a clear difference between the two models.
 #
-# The overlap between Gaussian predictions and the logistic regression predictions is fairly high with 81.5%. Even the overlap of the two predictions with the labels is 70.3%, which suggests that the difference between competence and performance - while detectable - does not necessarily have a large impact.
+# The overlap between Gaussian predictions and the logistic regression predictions is fairly high with 79.9%. Even the overlap of the two predictions with the labels is 68.7%, which suggests that the difference between competence and performance - while detectable - does not necessarily have a large impact.
 #
 # While further research is required (for example, repetition of this experiment with other labels, e.g. WALLS_UPGRADABILITY) and in-depth qualitative evaluation and comparison might reveal interesting aspects of the competence and performance model, we assume that the detected gap between the two models is not significant enough to make us question the suitablity of the logistic regression model for predicting upgradability.
 #
 # <br>
 # <br>
 # <div>
-# <img src="https://user-images.githubusercontent.com/42718928/179942821-d019dd6e-5968-4356-8a3a-a27e3c19701b.png" width="450"/>
+# <img src="https://user-images.githubusercontent.com/42718928/180186933-b5b6558f-a9cf-462d-9ccb-f7dd537cfb30.png" width="450"/>
 # </div>
 
 # %%

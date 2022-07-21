@@ -168,7 +168,7 @@ wales_df.head()
 #
 # ### Evaluation<a id='evaluation'></a>
 #
-# The logistic regression model performs very well when predicting ROOF_UPGRADABILITY, WALLS_UPGRADABILITY and FLOOR_UPGRADABILTIY with accuarcy scores of 84.47%, 94.85% and 90.51%, respectively, clearly outperforming the baseline.
+# The logistic regression model performs very well when predicting ROOF_UPGRADABILITY, WALLS_UPGRADABILITY and FLOOR_UPGRADABILTIY with accuarcy scores of 84.25%, 94.87% and 90.50%, respectively, clearly outperforming the baseline.
 #
 # The features with strongest coefficients generally seem to fit for the respective prediction label, for example the most important features when predicting WALLS_UPGRADABILITY include 8 derived form the WALLS_DESCRIPTION feature. Properties with filled cavity and well insulated walls are less likely be suitable for (another) wall upgrade, while those with cavity and granite walls are more likely to benefit from futher retrofit measures.
 #
