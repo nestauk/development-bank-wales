@@ -1,5 +1,7 @@
 # Measuring and Predicting Property Upgradability
 
+Last updated: 20 July 2022 by Julia Suter
+
 ## Table of Content<a id='top'></a>
 
 [**Introduction to Project**](#intro)
@@ -20,6 +22,8 @@
 <br>
 
 ## Introduction to Project<a id='intro'></a>
+
+[[back to top]](#top)
 
 ### Measuring and predicting property upgradability<a id='upgr'></a>
 
@@ -60,6 +64,8 @@ Once a set of retrofit measures has been designed for the retrofit loan, we can 
 
 ## Implementation Notes<a id='imp'></a>
 
+[[back to top]](#top)
+
 ### Jupyter Notebooks<a id='notebooks'></a>
 
 This codebase currently tackles three tasks, each with an assosciated Jupyter Notebook that guides you through the process. The notebooks are highly independent from each other, but were implemented in the following order.
@@ -83,6 +89,8 @@ Everyone else please raise an issue if the data is required.
 <br>
 
 ## Technical Details<a id='tech'></a>
+
+[[back to top]](#top)
 
 ### Setup<a id='setup'></a>
 
