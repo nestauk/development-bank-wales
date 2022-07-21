@@ -53,15 +53,14 @@ def train_and_evaluate_model(
 
         print("Predicting {} with {}".format(label_name, model_name))
         print("***************************************\n")
-        print("# Training Samples:", train_features.shape[0])
-        print("# Testing Samples:", test_features.shape[0])
-        print("# Features:", train_features.shape[1])
+        print("# Training Samples:\t", train_features.shape[0])
+        print("# Testing Samples:\t", test_features.shape[0])
+        print("# Features:\t\t", train_features.shape[1])
 
     model = model_dict[model_name]
     model.fit(train_features, train_labels)
 
     y_pred_test = model.predict(test_features)
-    y_pred_train = model.predict(train_features)
     accuracy_score(test_labels, y_pred_test)
 
     # Baseline

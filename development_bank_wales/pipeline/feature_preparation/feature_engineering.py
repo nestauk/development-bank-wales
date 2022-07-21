@@ -37,11 +37,14 @@ def roof_description_features(df):
 
     df["ROOF TYPE"] = df["ROOF TYPE"].replace(["Ar oleddf"], "Pitched")
 
-    df["LOFT INSULATION [in mm]"] = df["ROOF_DESCRIPTION"].str.extract(
-        r"(\d{1,3})\+?\s+mm loft insulation"
+    df["LOFT INSULATION [in mm]"] = (
+        df["ROOF_DESCRIPTION"]
+        .str.extract(r"(\d{1,3})\+?\s+mm loft insulation")
+        .astype(float)
     )
-    df["ROOF THERMAL TRANSMIT"] = df["ROOF_DESCRIPTION"].str.extract(
-        r"Average thermal transmittance|Trawsyriannedd thermol cyfartalog=?\s*(0\.\d{1,4})\s*W"
+
+    df["ROOF THERMAL TRANSMIT"] = (
+        df["ROOF_DESCRIPTION"].str.extract(r"\s*(0\.\d{1,3})\s*W\/m").astype(float)
     )
     df["ROOF INSULATION"] = df["ROOF_DESCRIPTION"].str.extract(
         r"(no insulation|insulated at rafters|limited insulation|ceiling insulated|insulated \(assumed\))"
@@ -79,9 +82,10 @@ def walls_description_features(df):
     df["WALL TYPE"] = df["WALL TYPE"].replace(["Waliau ceudod"], "Cavity wall")
     df["WALL TYPE"] = df["WALL TYPE"].replace(["Gwenithfaen"], "Granite or whin")
 
-    df["WALLS THERMAL TRANSMIT"] = df["WALLS_DESCRIPTION"].str.extract(
-        r"Average thermal transmittance|Trawsyriannedd thermol cyfartalog=?\s*(0\.\d{1,4})\s*W"
+    df["WALLS THERMAL TRANSMIT"] = (
+        df["WALLS_DESCRIPTION"].str.extract(r"\s*(0\.\d{1,3})\s*W\/m").astype(float)
     )
+
     df["WALLS INSULATION"] = df["WALLS_DESCRIPTION"].str.extract(
         r"(insulated|no insulation|filled cavity|with external insulation|with internal insulation|partial insulated)"
     )
@@ -119,8 +123,8 @@ def floor_description_features(df):
         "another dwelling below",
     )
 
-    df["FLOOR THERMAL TRANSMIT"] = df["FLOOR_DESCRIPTION"].str.extract(
-        r"Average thermal transmittance|Trawsyriannedd thermol cyfartalog=?\s*(0\.\d{1,4})\s*W"
+    df["FLOOR THERMAL TRANSMIT"] = (
+        df["FLOOR_DESCRIPTION"].str.extract(r"\s*(0\.\d{1,3})\s*W\/m").astype(float)
     )
     df["FLOOR INSULATION"] = df["FLOOR_DESCRIPTION"].str.extract(
         r"(insulated|no insulation|limited insulation|partial insulated|uninsulated)"
