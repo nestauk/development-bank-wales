@@ -31,7 +31,7 @@ def get_supplementary_data(df, data_path="S3"):
     df_suppl = data_agglomeration.add_hex_id(df_suppl, resolution=6)
 
     # Get Wales IMD data
-    wales_imd = imd_data.get_country_imd_data("Wales", data_path=data_path)[
+    wales_imd = imd_data.get_imd_data("Wales", data_path=data_path)[
         ["Postcode", "IMD Decile"]
     ]
 
