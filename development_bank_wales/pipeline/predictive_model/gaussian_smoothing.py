@@ -68,7 +68,7 @@ def get_smoothed_labels(
         smoothed_labels: np.array
             Smoothed labels.
         labels: np.array
-            Updated labels. If flipped: every 100th samples is flipped form True to False.
+            Updated labels. If filp_indices is True then every 100th sample is flipped.
         flipped_indices: np.array
             Indices for flipped samples.
 

@@ -18,6 +18,11 @@ from development_bank_wales.pipeline.feature_preparation import (
     feature_selection,
 )
 
+from development_bank_wales import PROJECT_DIR, get_yaml_config
+
+config = get_yaml_config(PROJECT_DIR / "development_bank_wales/config/base.yaml")
+
+
 # ----------------------------------------------------------------------------------
 
 
@@ -57,19 +62,19 @@ class FeatureEncoding(BaseEstimator, TransformerMixin):
 class SampleBalancing(BaseEstimator, TransformerMixin):
     """Class for balancing samples with binary labels."""
 
-    def __init__(self, label, false_ratio, binary):
+    def __init__(self, label, target_false_ratio, binary):
         self.label = label
-        self.false_ratio = false_ratio
+        self.target_false_ratio = target_false_ratio
         self.binary = binary
 
     def fit(self, X, y=None):
         return self
 
     def transform(self, X, y=None):
-        if self.false_ratio is None:
+        if self.target_false_ratio is None:
             return X
         else:
-            X = balance_set(X, self.label, self.false_ratio, self.binary)
+            X = balance_set(X, self.label, self.target_false_ratio, self.binary)
             return X
 
 
@@ -84,7 +89,7 @@ class NumpyFeatures(BaseEstimator, TransformerMixin):
         return X
 
 
-def balance_set(X, target_variable, false_ratio=0.8, binary=True):
+def balance_set(X, target_variable, target_false_ratio=0.8, binary=True):
     """Balance the training set.
     If false ratio set to 0.8, then 80% of the training data
     will have "False/No HP Installed" as a label.
@@ -92,7 +97,7 @@ def balance_set(X, target_variable, false_ratio=0.8, binary=True):
     Args:
         X (pd.DataFrame): Training set.
         target_variable (str): Variable/feature that is going to be predicted.
-        false_ratio (float, optional): How many False samples.
+        target_false_ratio (float, optional): How many False samples.
             When re-balancing the set, use the false_ratio
             to determine the amount of False labels. Defaults to 0.8.
         binary (bool, optional): Binary labels. Defaults to True.
@@ -101,12 +106,15 @@ def balance_set(X, target_variable, false_ratio=0.8, binary=True):
         X (pd.DataFrame): Re-balanced training set.
     """
 
-    multiplier = false_ratio / (1 - false_ratio)
+    if target_false_ratio > 1.0:
+        raise IOError("False ratio needs to be lower than 1.0")
+
+    multiplier = target_false_ratio / (1 - target_false_ratio)
 
     if binary:
         # Seperate samples with and without heat pumps
-        X_true = X.loc[X[target_variable] == True]
-        X_false = X.loc[X[target_variable] == False]
+        X_true = X[X[target_variable]]
+        X_false = X[~X[target_variable]]
 
         # If zero vs. non-zero
     else:
@@ -147,7 +155,7 @@ def feature_prep_pipeline(features, label, pca=False):
     """
 
     balancing_dict = {
-        "ROOF_UPGRADABILITY": 0.75,
+        "ROOF_UPGRADABILITY": config["roof_upgradability_false_ratio"],
         "WALLS_UPGRADABILITY": None,  # balancing not necessary
         "FLOOR_UPGRADABILITY": None,  # balancing not necessary
     }

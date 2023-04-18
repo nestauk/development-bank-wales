@@ -69,3 +69,57 @@ FIGURE_OUT: "outputs/figures/"
 SUPERVISED_MODEL_FIG_PATH: "outputs/figures/"
 KEPLER_CONFIG_PATH: "outputs/kepler/configs/"
 KEPLER_MAP_PATH: "outputs/kepler/maps/"
+
+rec_cat_dict:
+  {
+    "Increase loft insulation to 270 mm": "ROOF",
+    "Room-in-roof insulation": "ROOF",
+    "Flat roof insulation": "ROOF",
+    "Cavity wall insulation": "WALLS",
+    "High performance external doors": "WALLS",
+    "50 mm internal or external wall insulation": "WALLS",
+    "Party wall insulation": "WALLS",
+    "Solid floor insulation": "FLOOR",
+    "Floor insulation": "FLOOR",
+    "Suspended floor insulation": "FLOOR",
+    "Replace boiler with new condensing boiler": "MAINHEAT",
+    "Upgrade heating controls": "HEATING",
+    "Change heating to gas condensing boiler": "MAINHEAT",
+    "Upgrading heating controls": "MAINHEAT",
+    "High heat retention storage heaters": "MAINHEAT",
+    "Flue gas heat recovery device in conjunction with boiler": "MAINHEAT",
+    "Change room heaters to condensing boiler": "MAINHEAT",
+    "Time and temperature zone control": "MAINHEAT",
+    "Fan assisted storage heaters and dual immersion cylinder": "MAINHEAT",
+    "Fan assisted storage heaters": "MAINHEAT",
+    "Replace heating unit with condensing unit": "MAINHEAT",
+    "Fan-assisted storage heaters": "MAINHEAT",
+    "High heat retention storage heaters and dual immersion cylinder": "MAINHEAT",
+    "Replace boiler with biomass boiler": "MAINHEAT",
+    "Install condensing boiler": "MAINHEAT",
+    "Replacement warm air unit": "MAINHEAT",
+    "Condensing oil boiler with radiators": "MAINHEAT",
+    "Wood pellet stove with boiler and radiators": "MAINHEAT",
+    "Solar water heating": "HOT_WATER",
+    "Hot water cylinder thermostat": "HOT_WATER",
+    "Increase hot water cylinder insulation": "HOT_WATER",
+    "Insulate hot water cylinder with 80 mm jacket": "HOT_WATER",
+    "Add additional 80 mm jacket to hot water cylinder": "HOT_WATER",
+    "Heat recovery system for mixer showers": "HOT_WATER",
+    "Solar photovoltaic panels, 2.5 kWp": "ENERGY",
+    "Wind turbine": "ENERGY",
+    "Draughtproof single-glazed windows": "WINDOWS",
+    "Replace single glazed windows with low-E double glazing": "WINDOWS",
+    "Replacement glazing units": "WINDOWS",
+    "Secondary glazing to single glazed windows": "WINDOWS",
+    "Low energy lighting for all fixed outlets": "LIGHTING",
+  }
+
+weight_dict:
+  {
+    "ROOF_UPGRADABILITY": 0.35,
+    "WALLS_UPGRADABILITY": 0.5,
+    "FLOOR_UPGRADABILITY": 0.15,
+  }
+
+roof_upgradability_false_ratio: 0.75

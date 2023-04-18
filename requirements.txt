@@ -13,3 +13,4 @@ ipywidgets
 keplergl
 networkx
 sklearn
+seaborn

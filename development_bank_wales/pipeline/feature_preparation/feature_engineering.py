@@ -301,11 +301,12 @@ def compute_upgradability(df, verbose=False):
     return df
 
 
-def get_upgrade_features(df):
+def get_upgrade_features(df, verbose=False):
     """For properties with multiple records, get information about upgrades and upgradability score.
 
     Args:
         df (pd.DataFrame): Property features, including ENERGY_EFF and recommendations.
+        verbose (Boolean, optional): Whether to print upgradability computations.
 
     Returns:
         upgrade_df (pd.DataFrame): Dataframe with additional upgrade features.
@@ -315,13 +316,13 @@ def get_upgrade_features(df):
     df = extract_features_from_desc(df)
 
     # Only consider owner-occupied properties
-    df = df.loc[df["TENURE"] == "owner-occupied"]
+    df = df[df["TENURE"] == "owner-occupied"]
 
     # Get upgrade information based on properties with multiple entries
     latest_df = epc_data.filter_by_year(df, None, selection="latest entry")
     first_df = epc_data.filter_by_year(df, None, selection="first entry")
 
     upgrade_df = get_diff_in_energy_eff(first_df, latest_df, keep="first")
-    upgrade_df = compute_upgradability(upgrade_df)
+    upgrade_df = compute_upgradability(upgrade_df, verbose=verbose)
 
     return upgrade_df

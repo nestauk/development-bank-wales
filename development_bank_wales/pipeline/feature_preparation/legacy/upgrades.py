@@ -252,7 +252,11 @@ def uprade_connections(df):
     )
 
     edge_labels = dict(
-        [((n1, n2), str(round(d["weight"])) + "%") for n1, n2, d in G.edges(data=True)]
+        [
+            ((n1, n2), str(round(d["weight"])) + "%")
+            for n1, n2, d in G.edges(data=True)
+            if round(d["weight"]) > 0
+        ]
     )
 
     nx.draw_networkx_edge_labels(

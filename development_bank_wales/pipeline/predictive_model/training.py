@@ -16,6 +16,8 @@ from development_bank_wales.pipeline.predictive_model import evaluation, plottin
 
 # ----------------------------------------------------------------------------------
 
+# To do: more parameter screening
+
 model_dict = {
     "Logistic Regression": LogisticRegression(random_state=42),
     "Linear Support Vector Classifier": SGDClassifier(random_state=42),
@@ -42,7 +44,7 @@ def train_and_evaluate_model(
         verbose (bool, optional): Whether to print model, data and evaluation information. Defaults to True.
 
     Returns:
-        probabilities (np.array): Probabilities (for binary classification task) for all features.
+        probabilities (np.array): Probabilities (for binary classification task) for all features/instances.
     """
 
     train_features, test_features, train_labels, test_labels = train_test_split(

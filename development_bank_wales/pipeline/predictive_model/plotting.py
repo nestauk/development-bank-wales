@@ -40,10 +40,10 @@ def get_most_important_coefficients(model, feature_names, title, X, top_features
     if model.__class__.__name__ == "SVC":
         coef = model.coef_
         coef2 = coef.toarray().ravel() * X.std(axis=0)
-        coef1 = coef2[: len(feature_names)]
     else:
         coef2 = model.coef_.ravel() * X.std(axis=0)
-        coef1 = coef2[: len(feature_names)]
+
+    coef1 = coef2[: len(feature_names)]
 
     # Get top coefficients
     top_positive_coefficients = np.argsort(coef1)[-top_features:]
@@ -279,10 +279,10 @@ def plot_confusion_matrix(
         )
 
         # Add labels to the plot
-        tick_marks = np.arange(len(label_set))
-        tick_marks2 = tick_marks + 0.5
-        plt.xticks(tick_marks, label_set, rotation=25)
-        plt.yticks(tick_marks2, label_set, rotation=0)
+        tick_marks_x = np.arange(len(label_set))
+        tick_marks_y = tick_marks_x + 0.5
+        plt.xticks(tick_marks_x, label_set, rotation=25)
+        plt.yticks(tick_marks_y, label_set, rotation=0)
         plt.xlabel("Predicted label")
         plt.ylabel("Ground truth label")
         plt.title("Confusion Matrix for {}".format(title))

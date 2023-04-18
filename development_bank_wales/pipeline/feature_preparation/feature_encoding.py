@@ -180,8 +180,8 @@ def one_hot_encoding(df, features, limit=40, verbose=True):
     Args:
         df (pd.DataFrame):  Dataframe including features to encode.
         features (list): Features to ordinal encode.
-        limit (int, optional): _description_. Defaults to 40.
-        verbose (bool, optional): _description_. Defaults to True.
+        limit (int, optional): How many unique categories max. Defaults to 40.
+        verbose (bool, optional): Whether to print process. Defaults to True.
 
     Returns:
          df (pd.DataFrame): Dataframe with one-hot encoded features

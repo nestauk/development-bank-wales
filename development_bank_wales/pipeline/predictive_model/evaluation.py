@@ -37,7 +37,7 @@ def print_cross_validation(model, X, y, cv=5):
         model (sklearn.model): Unfitted model.
         X (np.array): Features.
         y (np.array): Labels.
-        cv (int, optional): How many cross validations. Defaults to 5.
+        cv (int, optional): Number of folds in cross-validation. Defaults to 5.
     """
 
     acc = cross_val_score(model, X, y, cv=cv, scoring="accuracy")
@@ -45,7 +45,7 @@ def print_cross_validation(model, X, y, cv=5):
     precision = cross_val_score(model, X, y, cv=cv, scoring="precision")
     recall = cross_val_score(model, X, y, cv=cv, scoring="recall")
 
-    print("5-fold Cross Validation\n-------------------------\n")
+    print("{}-fold Cross Validation\n-------------------------\n".format(cv))
     print("Accuracy:\t{:0.2f}%".format(acc.mean() * 100))
     print("F1 Score:\t{:0.2f}%".format(f1.mean() * 100))
     print("Recall:\t\t{:0.2f}%".format(recall.mean() * 100))

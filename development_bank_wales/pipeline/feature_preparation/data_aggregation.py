@@ -11,6 +11,10 @@ from asf_core_data.utils.geospatial import data_agglomeration
 
 from development_bank_wales.pipeline.feature_preparation.legacy import upgrades
 
+from development_bank_wales import PROJECT_DIR, get_yaml_config
+
+config = get_yaml_config(PROJECT_DIR / "development_bank_wales/config/base.yaml")
+
 # ---------------------------------------------------------------------------------
 
 
@@ -55,11 +59,10 @@ def get_mean_per_group(features_df, label_set, agglo_f="hex_id"):
         group_probas (pd.DataFrame): upgrade probabilities per group.
     """
 
-    weight_dict = {
-        "ROOF_UPGRADABILITY": 0.35,
-        "WALLS_UPGRADABILITY": 0.5,
-        "FLOOR_UPGRADABILITY": 0.15,
-    }
+    weight_dict = config["weight_dict"]
+
+    if sum(weight_dict.values()) != 1.0:
+        raise IOError("Weights do not add up to 1.0.")
 
     group_probas = (
         features_df.groupby([agglo_f])[["LMK_KEY"]]
@@ -100,8 +103,6 @@ def get_mean_per_group(features_df, label_set, agglo_f="hex_id"):
             columns={"MOST_FREQUENT_LOCAL_AUTHORITY_LABEL": "LOCAL_AUTHORITY_LABEL"}
         )
 
-        print(hex_to_LA.columns)
-        print(group_probas.columns)
         group_probas = pd.merge(hex_to_LA, group_probas, on=["LOCAL_AUTHORITY_LABEL"])
 
     return group_probas
