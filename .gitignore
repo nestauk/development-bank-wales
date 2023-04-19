@@ -110,6 +110,14 @@ target/
 !/outputs/data/*.md
 /outputs/models/*
 !/outputs/models/*.md
+/outputs/figures*
+!/outputs/figures/kepler/configs*
+/outputs/img*
+
+/backup/*
+
+/development_bank_wales/analysis/Recycling/*
+
 
 # Mac OS-specific storage files
 .DS_Store

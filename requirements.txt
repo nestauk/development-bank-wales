@@ -7,3 +7,10 @@ tqdm
 filelock
 typer
 sh
+asf_core_data@ git+ssh://git@github.com/nestauk/asf_core_data.git@dev
+boto3
+ipywidgets
+keplergl
+networkx
+sklearn
+seaborn
