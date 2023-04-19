@@ -22,50 +22,6 @@ config = get_yaml_config(PROJECT_DIR / "development_bank_wales/config/base.yaml"
 
 rec_cat_dict = config["rec_cat_dict"]
 
-# rec_cat_dict = {
-#     "Increase loft insulation to 270 mm": "ROOF",
-#     "Room-in-roof insulation": "ROOF",
-#     "Flat roof insulation": "ROOF",
-#     "Cavity wall insulation": "WALLS",
-#     "High performance external doors": "WALLS",
-#     "50 mm internal or external wall insulation": "WALLS",
-#     "Party wall insulation": "WALLS",
-#     "Solid floor insulation": "FLOOR",
-#     "Floor insulation": "FLOOR",
-#     "Suspended floor insulation": "FLOOR",
-#     "Replace boiler with new condensing boiler": "MAINHEAT",
-#     "Upgrade heating controls": "HEATING",
-#     "Change heating to gas condensing boiler": "MAINHEAT",
-#     "Upgrading heating controls": "MAINHEAT",
-#     "High heat retention storage heaters": "MAINHEAT",
-#     "Flue gas heat recovery device in conjunction with boiler": "MAINHEAT",
-#     "Change room heaters to condensing boiler": "MAINHEAT",
-#     "Time and temperature zone control": "MAINHEAT",
-#     "Fan assisted storage heaters and dual immersion cylinder": "MAINHEAT",
-#     "Fan assisted storage heaters": "MAINHEAT",
-#     "Replace heating unit with condensing unit": "MAINHEAT",
-#     "Fan-assisted storage heaters": "MAINHEAT",
-#     "High heat retention storage heaters and dual immersion cylinder": "MAINHEAT",
-#     "Replace boiler with biomass boiler": "MAINHEAT",
-#     "Install condensing boiler": "MAINHEAT",
-#     "Replacement warm air unit": "MAINHEAT",
-#     "Condensing oil boiler with radiators": "MAINHEAT",
-#     "Wood pellet stove with boiler and radiators": "MAINHEAT",
-#     "Solar water heating": "HOT_WATER",
-#     "Hot water cylinder thermostat": "HOT_WATER",
-#     "Increase hot water cylinder insulation": "HOT_WATER",
-#     "Insulate hot water cylinder with 80 mm jacket": "HOT_WATER",
-#     "Add additional 80 mm jacket to hot water cylinder": "HOT_WATER",
-#     "Heat recovery system for mixer showers": "HOT_WATER",
-#     "Solar photovoltaic panels, 2.5 kWp": "ENERGY",
-#     "Wind turbine": "ENERGY",
-#     "Draughtproof single-glazed windows": "WINDOWS",
-#     "Replace single glazed windows with low-E double glazing": "WINDOWS",
-#     "Replacement glazing units": "WINDOWS",
-#     "Secondary glazing to single glazed windows": "WINDOWS",
-#     "Low energy lighting for all fixed outlets": "LIGHTING",
-# }
-
 
 def get_bool_recom_features(df, unique_recs):
     """Get boolean recommendation features.
@@ -120,7 +76,7 @@ def load_epc_certs_and_recs(
     usecols=config["EPC_FEAT_SELECTION"],
     n_samples=None,
     remove_duplicates=False,
-    reload=True,
+    reload=False,
 ):
     """Load EPC records and recommendations and merge into one dataframe.
 
@@ -147,7 +103,6 @@ def load_epc_certs_and_recs(
         )
 
     else:
-
         version = "preprocessed_dedupl" if remove_duplicates else "preprocessed"
         epc_df = epc_data.load_preprocessed_epc_data(
             data_path=data_path,

@@ -3,15 +3,16 @@
 #   jupytext:
 #     cell_metadata_filter: -all
 #     comment_magics: true
+#     formats: ipynb,py:hydrogen
 #     text_representation:
 #       extension: .py
-#       format_name: percent
+#       format_name: hydrogen
 #       format_version: '1.3'
 #       jupytext_version: 1.13.8
 #   kernelspec:
-#     display_name: development_bank_wales
+#     display_name: dev_bank_wales
 #     language: python
-#     name: development_bank_wales
+#     name: dev_bank_wales
 # ---
 
 # %% [markdown]
@@ -69,13 +70,10 @@
 # %load_ext autoreload
 # %autoreload 2
 
-import pandas as pd
-
-
-from development_bank_wales import PROJECT_DIR, Path
+from development_bank_wales import PROJECT_DIR
+from development_bank_wales.getters import wales_epc
 
 from development_bank_wales.pipeline.feature_preparation import (
-    recommendations,
     feature_engineering,
 )
 
@@ -87,13 +85,10 @@ from development_bank_wales.pipeline.predictive_model import (
     gaussian_smoothing,
 )
 
-import sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.manifold import TSNE
 
 import numpy as np
-import scipy
-
 import matplotlib.pyplot as plt
 
 plt.style.use("default")
@@ -101,10 +96,11 @@ plt.style.use("seaborn")
 # %matplotlib inline
 plt.rcParams["figure.figsize"] = (7, 5)
 
-
 import warnings
 
 warnings.simplefilter(action="ignore")
+
+fig_output_path = PROJECT_DIR / "outputs/figures/"
 
 # %% [markdown]
 # ### Loading the data<a id='loading_data'></a>
@@ -113,26 +109,7 @@ warnings.simplefilter(action="ignore")
 # When executed the very first time, the EPC data is loaded from S3 and saved in `/outputs/data/`. This takes about 5min. After that, the data will be loaded from the local directory (<30 secs).
 
 # %%
-output_path = PROJECT_DIR / "outputs/data/wales_epc_with_recs.csv"
-fig_output_path = PROJECT_DIR / "outputs/figures/"
-
-if not Path(output_path).is_file():
-
-    print("Loading and preparing the data...")
-
-    wales_df = recommendations.load_epc_certs_and_recs(
-        data_path="S3", subset="Wales", n_samples=None, remove_duplicates=False
-    )
-
-    wales_df.to_csv(output_path, index=False)
-
-    print("Done!")
-
-else:
-
-    print("Loading the data...")
-    wales_df = pd.read_csv(output_path)
-    print("Done!")
+wales_df = wales_epc.get_wales_data()
 
 # %% [markdown]
 # ### Prepare features<a id='prep'></a>

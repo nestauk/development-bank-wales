@@ -3,18 +3,19 @@
 #   jupytext:
 #     cell_metadata_filter: -all
 #     comment_magics: true
-#     formats: ipynb,py:light
+#     formats: ipynb,py:hydrogen
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
+#       format_name: hydrogen
+#       format_version: '1.3'
 #       jupytext_version: 1.13.8
 #   kernelspec:
-#     display_name: development_bank_wales
+#     display_name: dev_bank_wales
 #     language: python
-#     name: development_bank_wales
+#     name: dev_bank_wales
 # ---
 
+# %% [markdown]
 # ## Predicting Upgradability
 #
 # Last updated: 20 July 2022 by Julia Suter
@@ -65,6 +66,7 @@
 # <img src="https://user-images.githubusercontent.com/42718928/179939383-0cab1163-dcb9-439d-a673-e98707d29188.png" width="1500"/>
 # </div>
 
+# %% [markdown]
 # ## Loading and preparing the data<a id='load_prep'></a>
 # [[back to top]](#top)
 #
@@ -73,25 +75,21 @@
 #
 # When executed the very first time, the EPC data is loaded from S3 and saved in `/outputs/data/`. This takes about 5min. After that, the data will be loaded from the local directory (<30 secs).
 
-# +
+# %%
 # %load_ext autoreload
 # %autoreload 2
 
-import pandas as pd
-
 from asf_core_data.utils.visualisation import kepler
 
-from development_bank_wales import PROJECT_DIR, Path
+from development_bank_wales import PROJECT_DIR
+from development_bank_wales.getters import wales_epc
 
 from development_bank_wales.pipeline.feature_preparation import (
-    recommendations,
     feature_engineering,
     data_aggregation,
 )
 from development_bank_wales.pipeline.predictive_model import (
     model_preparation,
-    plotting,
-    evaluation,
     training,
 )
 
@@ -101,37 +99,22 @@ import warnings
 
 warnings.simplefilter(action="ignore")
 
-# +
-output_path = PROJECT_DIR / "outputs/data/wales_epc_with_recs.csv"
 fig_output_path = PROJECT_DIR / "outputs/figures/"
 
-if not Path(output_path).is_file():
+# %%
+wales_df = wales_epc.get_wales_data()
 
-    print("Loading and preparing the data...")
-
-    wales_df = recommendations.load_epc_certs_and_recs(
-        data_path="S3", subset="Wales", n_samples=None, remove_duplicates=False
-    )
-
-    wales_df.to_csv(output_path, index=False)
-
-    print("Done!")
-
-else:
-
-    print("Loading the data...")
-    wales_df = pd.read_csv(output_path)
-    print("Done!")
-# -
-
+# %% [markdown]
 # ### Preparing features<a id='prep'></a>
 # [[back to top]](#top)
 #
 # We clean the description features, reduce the set to owner-occupied properties and retrieve information about upgrades and upgradability scores for the different categories.
 
+# %%
 wales_df = feature_engineering.get_upgrade_features(wales_df)
 wales_df.head()
 
+# %% [markdown]
 # ## Model for predicting upgradability<a id='model'></a>
 # [[back to top]](#top)
 #
@@ -174,10 +157,9 @@ wales_df.head()
 #
 # The feature coefficients suggest that the model picks up suitable information from the feature set and bases its predictions on relevant features, introducing little noise.
 
-# +
+# %%
 features_df = wales_df.copy()
 
-label = "ROOF_UPGRADABILITY"
 label_set = ["ROOF_UPGRADABILITY", "WALLS_UPGRADABILITY", "FLOOR_UPGRADABILITY"]
 
 for label in label_set:
@@ -190,8 +172,8 @@ for label in label_set:
     )
 
     features_df["proba {}".format(label)] = probas
-# -
 
+# %% [markdown]
 # ## Upgradability by Area<a id='area'></a>
 # [[back to top]](#top)
 #
@@ -207,10 +189,12 @@ for label in label_set:
 #
 # ### Aggregating the data on hex level<a id='aggr_hex'></a>
 
+# %%
 features_df = data_aggregation.get_supplementary_data(features_df, data_path="S3")
 data_per_group = data_aggregation.get_mean_per_group(features_df, label_set)
 data_per_group.head()
 
+# %% [markdown]
 # ### Map for upgradability by hex<a id='hex_map'></a>
 # [[back to top]](#top)
 #
@@ -219,7 +203,7 @@ data_per_group.head()
 #
 # A map like this could help identifying areas suitable for launching a pilot for a retrofit loan. The weighted upgradability can be fine-tuned depending on the loan's focus and specifications.
 
-# +
+# %%
 config = kepler.get_config("upgradability.txt", data_path=PROJECT_DIR)
 
 upgradability_map = KeplerGl(height=500, config=config)
@@ -264,26 +248,29 @@ upgradability_map.add_data(
 
 
 upgradability_map
-# -
 
+# %%
 kepler.save_config(upgradability_map, "upgradability.txt", data_path=PROJECT_DIR)
 kepler.save_map(upgradability_map, "Upgradability.html", data_path=PROJECT_DIR)
 
+# %% [markdown]
 # ### Aggregating the data on local authority level<a id='aggr_la'></a>
 # [[back to top]](#top)
 #
 
+# %%
 data_per_group = data_aggregation.get_mean_per_group(
     features_df, label_set, agglo_f="LOCAL_AUTHORITY_LABEL"
 )
 
+# %% [markdown]
 # ### Map for upgradability by local authority<a id='map_la'></a>
 # [[back to top]](#top)
 #
 #
 # By switching between layers, you can investigate the weighted upgradability, roof upgradability, walls upgradability, number of (EPC) properties, and the Index of Multiple Deprivation Decile.
 
-# +
+# %%
 config = kepler.get_config("LA_upgradability.txt", data_path=PROJECT_DIR)
 
 upgradability_map = KeplerGl(height=500, config=config)
@@ -319,7 +306,9 @@ upgradability_map.add_data(
 
 
 upgradability_map
-# -
 
+# %%
 kepler.save_config(upgradability_map, "LA_upgradability.txt", data_path=PROJECT_DIR)
 kepler.save_map(upgradability_map, "LA_Upgradability.html", data_path=PROJECT_DIR)
+
+# %%

@@ -86,6 +86,12 @@ For employees of Nesta, the data is available via the S3 bucket `asf-core-data`.
 
 Everyone else please raise an issue if the data is required.
 
+You can also download the input data from the S3 bucket called [asf-development-bank-wales](https://s3.console.aws.amazon.com/s3/buckets/asf-development-bank-wales?region=eu-west-2&tab=objects).
+
+```
+aws s3 sync s3://asf-development-bank-wales/wales_epc_with_recs.csv ./outputs/data/
+```
+
 <br>
 
 ## Technical Details<a id='tech'></a>
@@ -111,3 +117,4 @@ Everyone else please raise an issue if the data is required.
 <small><p>Project based on <a target="_blank" href="https://github.com/nestauk/ds-cookiecutter">Nesta's data science project template</a>
 (<a href="http://nestauk.github.io/ds-cookiecutter">Read the docs here</a>).
 </small>
+xw
